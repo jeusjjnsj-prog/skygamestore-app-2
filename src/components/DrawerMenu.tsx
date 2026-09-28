@@ -133,8 +133,8 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-slate-100 text-[10px] text-slate-400 text-center">
-          Skypro store • Premium Digital Accounts 2026
+        <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-500 text-center font-normal">
+          © 2026 SkyPro Store. All rights reserved.
         </div>
       </div>
     </div>

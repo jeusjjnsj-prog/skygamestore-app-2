@@ -556,6 +556,11 @@ export default function App() {
               />
             </div>
           )}
+
+          {/* Footer */}
+          <footer className="mt-8 mb-6 border-t border-slate-200/80 pt-6 pb-2 text-center text-xs text-slate-500 font-normal">
+            <p>© 2026 SkyPro Store. All rights reserved.</p>
+          </footer>
         </main>
 
         {/* Bottom Navigation */}
