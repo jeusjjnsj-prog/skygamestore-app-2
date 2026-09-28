@@ -41,13 +41,23 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center text-white font-black text-xs shadow-sm">
-                S
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl overflow-hidden bg-black border border-slate-700/50 flex items-center justify-center shadow-sm">
+                <img 
+                  src="/images/skypro_logo.jpg" 
+                  alt="Skypro store logo" 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
               </div>
-              <span className="font-black text-slate-900 text-base font-sans">
-                Skypro store
-              </span>
+              <div className="flex flex-col">
+                <span className="font-black text-slate-900 text-base font-sans leading-none">
+                  Skypro store
+                </span>
+                <span className="text-[10px] text-blue-600 font-medium mt-0.5">
+                  ហាងកម្មវិធី និងសេវាឌីជីថល
+                </span>
+              </div>
             </div>
             <button
               onClick={onClose}

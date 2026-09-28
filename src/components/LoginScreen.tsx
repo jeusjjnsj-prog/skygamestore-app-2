@@ -337,6 +337,22 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     <div className="font-['Kantumruy_Pro',sans-serif] pt-2 pb-12">
       {/* Login Card - Matches IMG_1187.png */}
       <div className="bg-white rounded-[28px] border border-slate-100 shadow-xs p-5 sm:p-6 space-y-4">
+        {/* Brand Logo Header */}
+        <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
+          <div className="w-11 h-11 rounded-2xl overflow-hidden bg-black border border-slate-700/50 flex items-center justify-center shadow-md shrink-0">
+            <img 
+              src="/images/skypro_logo.jpg" 
+              alt="Skypro store logo" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div>
+            <h2 className="text-base font-black text-slate-900 tracking-tight font-sans leading-tight">Skypro store</h2>
+            <p className="text-[11px] text-blue-600 font-medium">ហាងកម្មវិធី និងសេវាឌីជីថល</p>
+          </div>
+        </div>
+
         {/* Title */}
         <h1 className="text-[19px] sm:text-[21px] font-bold text-slate-900 tracking-tight">
           {isRegisterMode ? 'បង្កើតគណនី' : 'ចូលប្រើ'}

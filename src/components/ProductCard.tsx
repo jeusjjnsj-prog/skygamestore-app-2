@@ -53,12 +53,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="w-[168px] h-[245px] sm:w-[250px] sm:h-[360px] lg:w-[270px] lg:h-[380px] bg-white rounded-2xl sm:rounded-3xl p-2 sm:p-3.5 border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.08)] flex flex-col justify-between transition-all duration-200 font-['Kantumruy_Pro'] relative group select-none shrink-0">
+    <div className="w-full bg-white rounded-[14px] p-2.5 sm:p-3.5 border border-[#38bdf8] shadow-[0_2px_10px_rgba(56,189,248,0.14)] hover:shadow-[0_8px_22px_rgba(56,189,248,0.22)] flex flex-col justify-between transition-all duration-200 font-['Kantumruy_Pro'] relative group select-none">
       
-      {/* Product Image Box with fixed responsive height */}
+      {/* Product Image Box with aspect-ratio: 1/1 and min-height: 130px on mobile */}
       <div 
         onClick={handleOpenDetail}
-        className="w-full h-[110px] sm:h-[170px] lg:h-[185px] rounded-xl sm:rounded-2xl overflow-hidden relative cursor-pointer shrink-0 bg-slate-50 transition-transform active:scale-[0.98]"
+        className="w-full aspect-square min-h-[130px] sm:aspect-[4/3] sm:min-h-[170px] lg:h-[185px] rounded-[10px] sm:rounded-xl overflow-hidden relative cursor-pointer shrink-0 bg-slate-50 transition-transform active:scale-[0.98]"
       >
         {/* Change Image Button - ONLY VISIBLE TO MASTER ADMIN (0969749477) */}
         {isAdmin && (
@@ -99,12 +99,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Product Details Section */}
-      <div className="pt-1.5 sm:pt-2.5 flex flex-col flex-1 justify-between min-h-0">
+      <div className="pt-2 sm:pt-2.5 flex flex-col flex-1 justify-between min-h-0">
         <div>
           {/* Title with 2-line clamp */}
           <h3 
             onClick={handleOpenDetail}
-            className="font-medium text-slate-800 text-[11px] sm:text-[14px] leading-tight sm:leading-snug line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors min-h-[26px] sm:min-h-[38px]"
+            className="font-medium text-slate-800 text-[11.5px] sm:text-[14px] leading-snug line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors min-h-[28px] sm:min-h-[38px]"
             title={product.titleKhmer}
           >
             {product.titleKhmer}
@@ -125,7 +125,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Action Button - Royal Blue */}
         <button
           onClick={() => onBuyNow(product)}
-          className="w-full h-[28px] sm:h-[38px] rounded-lg sm:rounded-xl bg-[#4344e6] hover:bg-[#3839d6] text-white font-medium text-[11px] sm:text-[13px] shadow-xs active:scale-[0.98] transition-all flex items-center justify-center font-['Kantumruy_Pro'] cursor-pointer mt-1 sm:mt-2"
+          className="w-full h-[30px] sm:h-[38px] rounded-lg sm:rounded-xl bg-[#4344e6] hover:bg-[#3839d6] text-white font-medium text-[11.5px] sm:text-[13px] shadow-xs active:scale-[0.98] transition-all flex items-center justify-center font-['Kantumruy_Pro'] cursor-pointer mt-1.5 sm:mt-2"
         >
           ទិញឥឡូវ
         </button>

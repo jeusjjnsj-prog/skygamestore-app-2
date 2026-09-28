@@ -446,27 +446,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
               </div>
             </div>
 
-            {/* 
-              4. SPECIFIED BUTTON:
-              ប៊ូតុង “បញ្ជាទិញឥឡូវ” ធ្វើ Full Width និងកម្ពស់ 55px
-            */}
-            <button
-              onClick={handleConfirmPaid}
-              disabled={isVerifying}
-              className="w-full h-[55px] rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold text-base sm:text-lg shadow-lg shadow-blue-500/25 active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-80"
-            >
-              {isVerifying ? (
-                <>
-                  <Loader2 size={20} className="animate-spin text-white" />
-                  <span>កំពុងផ្ទៀងផ្ទាត់ការបង់ប្រាក់...</span>
-                </>
-              ) : (
-                <>
-                  <ShieldCheck size={22} className="text-white" />
-                  <span>បញ្ជាទិញឥឡូវ</span>
-                </>
-              )}
-            </button>
+
 
             {/* Refresh QR & Cancel Buttons */}
             <div className="flex items-center gap-3 pt-1">

@@ -362,7 +362,7 @@ export default function App() {
         {/* Main Tab Content */}
         <main className="flex-1">
           {activeTab === 'home' && (
-            <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="px-2.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
               {/* Hero Banner */}
               <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-800 p-5 sm:p-8 text-white shadow-md">
                 <div className="relative z-10 max-w-sm">
@@ -416,8 +416,8 @@ export default function App() {
                 </button>
               </div>
 
-              {/* 2 Cards per row on Mobile (168x245px), and 4 Cards per row on Desktop (270x380px) */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 lg:gap-6 justify-center justify-items-center pt-1">
+              {/* 2 Cards per row on Mobile (Full Grid Width), and 4 Cards per row on Desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[11px] sm:gap-4 md:gap-5 lg:gap-6 pt-1">
                 {homeFeaturedProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -454,7 +454,7 @@ export default function App() {
           )}
 
           {activeTab === 'products' && (
-            <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="px-2.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
               {/* Catalog Header */}
               <div>
                 <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -499,8 +499,8 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Products Grid: 2 Cards per row on Mobile (168x245px), and 4 Cards per row on Desktop (270x380px) */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 lg:gap-6 justify-center justify-items-center pt-1">
+              {/* Products Grid: 2 Cards per row on Mobile (Full Grid Width), and 4 Cards per row on Desktop */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[11px] sm:gap-4 md:gap-5 lg:gap-6 pt-1">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}

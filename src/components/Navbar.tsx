@@ -18,16 +18,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3 sm:py-3.5 flex items-center justify-between shadow-xs">
       {/* Brand: Skypro store */}
       <div className="flex items-center gap-2.5">
-        {/* Skypro Store Logo Mark */}
-        <div className="relative w-8 h-8 rounded-xl bg-gradient-to-tr from-[#3b82f6] via-[#6366f1] to-[#a855f7] p-0.5 shadow-md flex items-center justify-center">
-          <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center">
-            <span className="font-black text-sm bg-gradient-to-tr from-[#2563eb] to-[#7c3aed] bg-clip-text text-transparent font-sans">
-              S
-            </span>
-          </div>
-          <div className="absolute -top-1 -right-1 text-amber-400">
-            <Sparkles size={11} className="fill-amber-400" />
-          </div>
+        {/* Skypro Store Logo Image */}
+        <div className="relative w-8 h-8 rounded-xl overflow-hidden shadow-sm flex items-center justify-center bg-black border border-slate-700/40">
+          <img 
+            src="/images/skypro_logo.jpg" 
+            alt="Skypro store logo" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
         </div>
 
         {/* Shop Name: Skypro store */}
