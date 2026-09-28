@@ -10,6 +10,7 @@ interface ProductCardProps {
   onAddToCart?: (product: Product) => void;
   customImage?: string | null;
   onUpdateCustomImage?: (productId: string, dataUrl: string | null) => void;
+  isAdmin?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -18,6 +19,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onSelectProduct,
   customImage,
   onUpdateCustomImage,
+  isAdmin = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,77 +53,79 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-3xl p-3 shadow-xs border border-slate-100 flex flex-col justify-between transition-all hover:shadow-md font-['Kantumruy_Pro'] relative group">
-      {/* Change Image Button above the product image */}
-      <div className="flex items-center justify-between pb-1.5 px-0.5">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            fileInputRef.current?.click();
-          }}
-          className="flex items-center gap-1 text-[10px] font-medium text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100/80 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
-          title="ចុចដើម្បីប្ដូររូបភាពផលិតផលពិត"
-        >
-          <Camera size={11} />
-          <span>ប្ដូររូបភាព</span>
-        </button>
-
-        {customImage && (
-          <button
-            onClick={handleResetImage}
-            className="text-[10px] text-red-500 hover:text-red-700 p-0.5 rounded hover:bg-red-50 transition-colors"
-            title="ត្រឡប់ទៅរូបដើមវិញ"
-          >
-            <Trash2 size={11} />
-          </button>
-        )}
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileChange}
-        />
-      </div>
-
-      {/* Product Image Box */}
+    <div className="w-[168px] h-[245px] sm:w-[250px] sm:h-[360px] lg:w-[270px] lg:h-[380px] bg-white rounded-2xl sm:rounded-3xl p-2 sm:p-3.5 border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_25px_rgba(0,0,0,0.08)] flex flex-col justify-between transition-all duration-200 font-['Kantumruy_Pro'] relative group select-none shrink-0">
+      
+      {/* Product Image Box with fixed responsive height */}
       <div 
         onClick={handleOpenDetail}
-        className="cursor-pointer overflow-hidden rounded-2xl transition-transform active:scale-[0.98]"
+        className="w-full h-[110px] sm:h-[170px] lg:h-[185px] rounded-xl sm:rounded-2xl overflow-hidden relative cursor-pointer shrink-0 bg-slate-50 transition-transform active:scale-[0.98]"
       >
+        {/* Change Image Button - ONLY VISIBLE TO MASTER ADMIN (0969749477) */}
+        {isAdmin && (
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="absolute top-1.5 left-1.5 z-20 flex items-center gap-1"
+          >
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1 text-[9px] sm:text-[11px] font-medium text-white bg-slate-900/85 hover:bg-slate-900 backdrop-blur-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg shadow-sm transition-colors cursor-pointer"
+              title="ចុចដើម្បីប្ដូររូបភាពពិត (Admin)"
+            >
+              <Camera size={10} className="sm:w-3 sm:h-3" />
+              <span>ប្ដូររូប</span>
+            </button>
+
+            {customImage && (
+              <button
+                onClick={handleResetImage}
+                className="text-white hover:text-red-200 bg-red-600/85 hover:bg-red-600 p-0.5 sm:p-1 rounded-md sm:rounded-lg shadow-sm transition-colors cursor-pointer"
+                title="ត្រឡប់ទៅរូបដើមវិញ"
+              >
+                <Trash2 size={10} className="sm:w-3 sm:h-3" />
+              </button>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </div>
+        )}
+
         <ProductImage type={product.imageType} customSrc={customImage} />
       </div>
 
-      {/* Product Details */}
-      <div className="pt-2 flex flex-col flex-1 justify-between">
+      {/* Product Details Section */}
+      <div className="pt-1.5 sm:pt-2.5 flex flex-col flex-1 justify-between min-h-0">
         <div>
-          {/* Title in clean modern font */}
+          {/* Title with 2-line clamp */}
           <h3 
             onClick={handleOpenDetail}
-            className="font-medium text-slate-800 text-[13px] sm:text-[14px] leading-snug line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors min-h-[38px]"
+            className="font-medium text-slate-800 text-[11px] sm:text-[14px] leading-tight sm:leading-snug line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors min-h-[26px] sm:min-h-[38px]"
+            title={product.titleKhmer}
           >
             {product.titleKhmer}
           </h3>
 
-          {/* Price */}
-          <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-[18px] sm:text-[20px] font-bold text-[#2563eb] tracking-tight">
+          {/* Price & Sales Row */}
+          <div className="mt-1 sm:mt-1.5 flex items-baseline justify-between">
+            <span className="text-[14.5px] sm:text-[20px] font-bold text-[#2563eb] tracking-tight">
               ${product.price.toFixed(2)}
             </span>
-          </div>
-
-          {/* Sales count row */}
-          <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 mb-2">
-            <span className="text-amber-500 text-xs">🔥</span>
-            <span>{product.salesCount} បានលក់</span>
+            <div className="flex items-center gap-0.5 text-[9px] sm:text-[11px] text-slate-500 font-normal">
+              <span className="text-amber-500 text-[10px] sm:text-xs">🔥</span>
+              <span>{product.salesCount}</span>
+            </div>
           </div>
         </div>
 
-        {/* Action Button - Sleek, full-width Royal Blue */}
+        {/* Action Button - Royal Blue */}
         <button
           onClick={() => onBuyNow(product)}
-          className="w-full py-2 px-3 rounded-xl bg-[#4344e6] hover:bg-[#3839d6] text-white font-medium text-[13px] shadow-xs active:scale-[0.98] transition-all flex items-center justify-center font-['Kantumruy_Pro'] cursor-pointer"
+          className="w-full h-[28px] sm:h-[38px] rounded-lg sm:rounded-xl bg-[#4344e6] hover:bg-[#3839d6] text-white font-medium text-[11px] sm:text-[13px] shadow-xs active:scale-[0.98] transition-all flex items-center justify-center font-['Kantumruy_Pro'] cursor-pointer mt-1 sm:mt-2"
         >
           ទិញឥឡូវ
         </button>

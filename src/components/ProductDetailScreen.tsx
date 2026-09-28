@@ -25,6 +25,7 @@ interface ProductDetailScreenProps {
   onOpenCart: () => void;
   customImage?: string | null;
   onUpdateCustomImage?: (productId: string, dataUrl: string | null) => void;
+  isAdmin?: boolean;
 }
 
 export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
@@ -36,6 +37,7 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
   onOpenCart,
   customImage,
   onUpdateCustomImage,
+  isAdmin = false,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [selectedDurationIndex, setSelectedDurationIndex] = useState(0);
@@ -170,45 +172,47 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
       <div className="w-full max-w-md mx-auto sm:max-w-xl md:max-w-2xl p-4 sm:p-5 space-y-4">
         {/* Product Image Banner Box */}
         <div className="rounded-3xl overflow-hidden shadow-xs border border-slate-100 bg-white p-3 space-y-2">
-          {/* Change Image Bar */}
-          <div className="flex items-center justify-between px-1">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100 px-3 py-1 rounded-lg transition-colors cursor-pointer"
-            >
-              <Camera size={13} />
-              <span>ប្ដូររូបភាពផលិតផលពិត</span>
-            </button>
-
-            {customImage && (
+          {/* Change Image Bar - Visible ONLY to Master Admin */}
+          {isAdmin && (
+            <div className="flex items-center justify-between px-1">
               <button
-                onClick={() => onUpdateCustomImage && onUpdateCustomImage(product.id, null)}
-                className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
-                title="ត្រឡប់ទៅរូបដើមវិញ"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50/80 hover:bg-blue-100 px-3 py-1 rounded-lg transition-colors cursor-pointer"
               >
-                <Trash2 size={13} />
-                <span>រូបដើម</span>
+                <Camera size={13} />
+                <span>ប្ដូររូបភាពផលិតផលពិត</span>
               </button>
-            )}
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file && onUpdateCustomImage) {
-                  const reader = new FileReader();
-                  reader.onload = (event) => {
-                    const res = event.target?.result as string;
-                    if (res) onUpdateCustomImage(product.id, res);
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-            />
-          </div>
+              {customImage && (
+                <button
+                  onClick={() => onUpdateCustomImage && onUpdateCustomImage(product.id, null)}
+                  className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                  title="ត្រឡប់ទៅរូបដើមវិញ"
+                >
+                  <Trash2 size={13} />
+                  <span>រូបដើម</span>
+                </button>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file && onUpdateCustomImage) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const res = event.target?.result as string;
+                      if (res) onUpdateCustomImage(product.id, res);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+            </div>
+          )}
 
           <ProductImage 
             type={product.imageType} 

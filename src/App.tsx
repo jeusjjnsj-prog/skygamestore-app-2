@@ -22,6 +22,7 @@ import {
   setCustomProductImage, 
   removeCustomProductImage 
 } from './utils/imageStore';
+import { storeSync } from './services/storeSync';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -30,20 +31,21 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Custom Product Images uploaded by user/admin
+  // Custom Product Images synchronized live across all visitors without redeploy
   const [customImages, setCustomImages] = useState<Record<string, string>>(() => {
-    return getAllCustomProductImages();
+    return storeSync.getData().productImages;
   });
 
-  const handleUpdateCustomImage = (productId: string, dataUrl: string | null) => {
-    if (dataUrl) {
-      setCustomProductImage(productId, dataUrl);
-      showToast('បានប្តូររូបភាពផលិតផលពិតរួចរាល់!');
-    } else {
-      removeCustomProductImage(productId);
-      showToast('បានត្រឡប់ទៅរូបភាពដើមវិញ!');
-    }
-    setCustomImages(getAllCustomProductImages());
+  useEffect(() => {
+    const unsubscribe = storeSync.subscribe((data) => {
+      setCustomImages(data.productImages);
+    });
+    return unsubscribe;
+  }, []);
+
+  const handleUpdateCustomImage = async (productId: string, dataUrl: string | null) => {
+    await storeSync.updateProductImage(productId, dataUrl);
+    showToast(dataUrl ? 'បានប្តូររូបភាពផលិតផលជោគជ័យ (ភ្ញៀវទាំងអស់ឃើញភ្លាមៗ)!' : 'បានកំណត់រូបភាពដើមឡើងវិញ!');
   };
 
   // Cart state
@@ -79,6 +81,19 @@ export default function App() {
     }
   });
 
+  // Master Admin verification (Strictly Phone: 0969749477 with Admin Session)
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    try {
+      const isLogged = localStorage.getItem('skypro_is_logged_in') === 'true';
+      let phone = (localStorage.getItem('skypro_user_phone') || '').replace(/[\s-+]/g, '');
+      if (phone.startsWith('855')) phone = '0' + phone.slice(3);
+      const isAdminFlag = localStorage.getItem('skypro_is_admin') === 'true';
+      return isLogged && isAdminFlag && phone === '0969749477';
+    } catch {
+      return false;
+    }
+  });
+
   const [pendingCartPayment, setPendingCartPayment] = useState(false);
 
   // Orders history state - strictly loaded from localStorage and isolated by phone
@@ -105,13 +120,6 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  /**
-   * Flow when clicking "ទិញឥឡូវ" (Buy Now):
-   * 1. Does NOT pay on home page!
-   * 2. Adds the item to Cart.
-   * 3. Jumps directly to the Cart tab (កន្ត្រកទំនិញ).
-   * 4. Shows items in Cart matching IMG_1190.png.
-   */
   const handleBuyNow = (product: Product, durationIndex: number = 0) => {
     const chosenPlan = product.durations[durationIndex] || product.durations[0];
     const itemPrice = chosenPlan ? chosenPlan.price : product.price;
@@ -135,11 +143,25 @@ export default function App() {
 
     // Close detail view if open
     setViewingProduct(null);
-    setIsPayingInCart(false);
 
-    // Navigate to Cart tab!
+    // If customer is not logged in, enforce creating an account / login first!
+    if (!isLoggedIn || !userPhone.trim()) {
+      setPendingCartPayment(true);
+      setIsPayingInCart(false);
+      setActiveTab('account');
+      showToast('សូមបង្កើតគណនី ឬចូលប្រើជាមុនសិន ទើបអាចទិញទំនិញបាន!');
+      return;
+    }
+
+    // If already logged in, proceed directly to payment checkout
+    const payingItem: Product = {
+      ...product,
+      price: itemPrice,
+      durations: chosenPlan ? [chosenPlan] : product.durations
+    };
+    setCartPayingProduct(payingItem);
+    setIsPayingInCart(true);
     setActiveTab('cart');
-    showToast(`បានបញ្ចូល ${product.titleKhmer} ទៅកន្ត្រក!`);
   };
 
   const handleAddToCart = (product: Product, durationIndex: number = 0) => {
@@ -217,18 +239,30 @@ export default function App() {
   };
 
   // When user completes login / registration
-  const handleLoginSuccess = (phone: string) => {
-    setUserPhone(phone);
+  const handleLoginSuccess = (phone: string, isAdminUser: boolean = false) => {
+    let cleanPhone = phone.replace(/[\s-+]/g, '');
+    if (cleanPhone.startsWith('855')) cleanPhone = '0' + cleanPhone.slice(3);
+
+    const isMasterAdmin = isAdminUser && cleanPhone === '0969749477';
+
+    setUserPhone(cleanPhone);
     setIsLoggedIn(true);
+    setIsAdmin(isMasterAdmin);
+
     try {
       localStorage.setItem('skypro_is_logged_in', 'true');
-      localStorage.setItem('skypro_user_phone', phone);
+      localStorage.setItem('skypro_user_phone', cleanPhone);
+      if (isMasterAdmin) {
+        localStorage.setItem('skypro_is_admin', 'true');
+      } else {
+        localStorage.removeItem('skypro_is_admin');
+      }
     } catch {
       // ignore
     }
-    showToast('ចូលគណនីជោគជ័យ!');
 
-    // If they were trying to checkout from Cart, take them back to Cart to pay!
+    showToast(isMasterAdmin ? '👑 សូមស្វាគមន៍ Master Admin! (មានសិទ្ធិកែប្រែរូបភាព)' : 'ចូលគណនីជោគជ័យ!');
+
     if (pendingCartPayment) {
       setPendingCartPayment(false);
       setActiveTab('cart');
@@ -247,11 +281,13 @@ export default function App() {
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setIsAdmin(false);
     setUserPhone('');
     setIsPayingInCart(false);
     try {
       localStorage.removeItem('skypro_is_logged_in');
       localStorage.removeItem('skypro_user_phone');
+      localStorage.removeItem('skypro_is_admin');
     } catch {
       // ignore
     }
@@ -266,7 +302,7 @@ export default function App() {
     return matchCat && matchSearch;
   });
 
-  // Top 4 exact products for Home Screen matching screenshot
+  // Top 4 exact products for Home Screen
   const homeFeaturedProducts = PRODUCTS.slice(0, 4);
 
   const totalCartCount = cart.reduce((s, i) => s + i.quantity, 0);
@@ -295,6 +331,7 @@ export default function App() {
           }}
           customImage={customImages[viewingProduct.id]}
           onUpdateCustomImage={handleUpdateCustomImage}
+          isAdmin={isAdmin}
         />
       </div>
     );
@@ -310,8 +347,8 @@ export default function App() {
         </div>
       )}
 
-      {/* Outer wrapper max-width for realistic phone/tablet presentation */}
-      <div className="w-full max-w-md mx-auto sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex-1 flex flex-col bg-white min-h-screen shadow-xs">
+      {/* Outer wrapper: responsive sizing with ample room for mobile (2 cols) and desktop (4 cols) */}
+      <div className="w-full max-w-md mx-auto sm:max-w-2xl md:max-w-4xl lg:max-w-6xl xl:max-w-7xl flex-1 flex flex-col bg-white min-h-screen shadow-xs">
         {/* Top Navbar */}
         <Navbar
           cartCount={totalCartCount}
@@ -319,24 +356,53 @@ export default function App() {
             setIsPayingInCart(false);
             setActiveTab('cart');
           }}
-          onOpenAccount={() => {
-            setIsPayingInCart(false);
-            setActiveTab('account');
-          }}
           onOpenDrawer={() => setIsDrawerOpen(true)}
         />
 
-        {/* Content View Based on Active Tab */}
+        {/* Main Tab Content */}
         <main className="flex-1">
           {activeTab === 'home' && (
-            <div className="p-4 sm:p-5 space-y-4">
-              {/* Section Header: "ទំនិញពិសេស" matching screenshot */}
-              <div className="flex items-center justify-between pt-1">
-                <div>
-                  <h1 className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight">
-                    ទំនិញពិសេស
+            <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6">
+              {/* Hero Banner */}
+              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-800 p-5 sm:p-8 text-white shadow-md">
+                <div className="relative z-10 max-w-sm">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-semibold text-blue-100 mb-3 border border-white/20">
+                    <Sparkles size={12} className="text-yellow-300" />
+                    <span>សេវាកម្មឌីជីថលសុទ្ធ ១០០%</span>
+                  </div>
+
+                  <h1 className="text-xl sm:text-2xl font-extrabold leading-snug tracking-tight">
+                    គណនី AI & កម្មវិធីកាត់តគុណភាពខ្ពស់
                   </h1>
-                  <p className="text-[12px] sm:text-[13px] text-slate-500 mt-0.5 font-normal">
+
+                  <p className="mt-2 text-xs sm:text-sm text-blue-100/90 leading-relaxed">
+                    Gemini AI Pro, CapCut Pro, Grok, ChatGPT Plus ធានាការប្រើប្រាស់ពេញលេញ
+                  </p>
+
+                  <button
+                    onClick={() => setActiveTab('products')}
+                    className="mt-4 px-4 py-2 rounded-2xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>មើលទំនិញទាំងអស់</span>
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
+
+                {/* Decorative background shapes */}
+                <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl"></div>
+                <div className="absolute right-8 top-6 w-24 h-24 rounded-full bg-blue-400/20 blur-lg"></div>
+              </div>
+
+              {/* Section Header */}
+              <div className="flex items-center justify-between pt-2">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <Flame size={18} className="text-amber-500 fill-amber-500" />
+                    <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                      ផលិតផលលក់ដាច់បំផុត (Popular Items)
+                    </h2>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     ផលិតផលដែលអតិថិជនទិញច្រើនជាងគេ
                   </p>
                 </div>
@@ -350,8 +416,8 @@ export default function App() {
                 </button>
               </div>
 
-              {/* 2-Columns Grid with Change Image button */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-1">
+              {/* 2 Cards per row on Mobile (168x245px), and 4 Cards per row on Desktop (270x380px) */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 lg:gap-6 justify-center justify-items-center pt-1">
                 {homeFeaturedProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -361,6 +427,7 @@ export default function App() {
                     onAddToCart={(prod) => handleAddToCart(prod)}
                     customImage={customImages[product.id]}
                     onUpdateCustomImage={handleUpdateCustomImage}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </div>
@@ -387,10 +454,10 @@ export default function App() {
           )}
 
           {activeTab === 'products' && (
-            <div className="p-4 sm:p-5 space-y-4">
+            <div className="p-3.5 sm:p-6 space-y-4 sm:space-y-6">
               {/* Catalog Header */}
               <div>
-                <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                   ទំនិញ & គណនីទាំងអស់ (All Products)
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
@@ -432,8 +499,8 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Products Grid with Change Image button */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-1">
+              {/* Products Grid: 2 Cards per row on Mobile (168x245px), and 4 Cards per row on Desktop (270x380px) */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-5 lg:gap-6 justify-center justify-items-center pt-1">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -443,22 +510,24 @@ export default function App() {
                     onAddToCart={(prod) => handleAddToCart(prod)}
                     customImage={customImages[product.id]}
                     onUpdateCustomImage={handleUpdateCustomImage}
+                    isAdmin={isAdmin}
                   />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Cart Tab: Payment is strictly placed here! */}
+          {/* Cart Tab: Payment is strictly placed here */}
           {activeTab === 'cart' && (
-            <div className="p-4 sm:p-5">
+            <div className={isPayingInCart ? "py-2 sm:py-4 flex justify-center w-full" : "p-4 sm:p-5"}>
               {isPayingInCart && cartPayingProduct ? (
-                /* Payment Screen directly in Cart (Matches IMG_1188.png) */
                 <PaymentScreen
                   product={cartPayingProduct}
                   onCancel={() => setIsPayingInCart(false)}
                   onSuccessOrder={handleSuccessOrder}
                   userContact={userPhone || ''}
+                  isAdmin={isAdmin}
+                  customProductImage={customImages[cartPayingProduct.id]}
                 />
               ) : (
                 <CartScreen
@@ -478,6 +547,7 @@ export default function App() {
             <div className="p-4 sm:p-5">
               <LoginScreen
                 isLoggedIn={isLoggedIn}
+                isAdmin={isAdmin}
                 userPhone={userPhone}
                 orders={orders}
                 pendingCartCheckout={pendingCartPayment}
