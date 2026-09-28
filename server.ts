@@ -9,15 +9,41 @@ const DATA_FILE = path.resolve(process.cwd(), 'data', 'store_data.json');
 
 // Ensure data folder and storage file exist
 function loadStoreData(): { productImages: Record<string, string>; qrImage: string | null } {
+  let result: { productImages: Record<string, string>; qrImage: string | null } = { productImages: {}, qrImage: null };
   try {
     if (fs.existsSync(DATA_FILE)) {
       const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-      return JSON.parse(raw);
+      result = JSON.parse(raw);
     }
   } catch (err) {
     console.error('Error loading store data:', err);
   }
-  return { productImages: {}, qrImage: null };
+
+  // Fallback to static public/images if any image is missing
+  try {
+    const publicImagesDir = path.resolve(process.cwd(), 'public', 'images');
+    if (fs.existsSync(publicImagesDir)) {
+      const files = fs.readdirSync(publicImagesDir);
+      for (const file of files) {
+        if (file.endsWith('.jpg') || file.endsWith('.png') || file.endsWith('.jpeg')) {
+          const id = path.parse(file).name;
+          if (id === 'khqr_custom') {
+            if (!result.qrImage) {
+              result.qrImage = `/images/${file}`;
+            }
+          } else {
+            if (!result.productImages[id]) {
+              result.productImages[id] = `/images/${file}`;
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error checking public/images fallback:', err);
+  }
+
+  return result;
 }
 
 function saveStoreData(data: { productImages: Record<string, string>; qrImage: string | null }) {
@@ -60,6 +86,29 @@ app.get('/api/store-data', (_req: Request, res: Response) => {
   });
 });
 
+function syncImageToPublicFolder(filenamePrefix: string, dataUrl: string | null) {
+  try {
+    const publicDir = path.resolve(process.cwd(), 'public', 'images');
+    if (!fs.existsSync(publicDir)) {
+      fs.mkdirSync(publicDir, { recursive: true });
+    }
+    const filePath = path.join(publicDir, `${filenamePrefix}.jpg`);
+    if (!dataUrl) {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return;
+    }
+    const match = dataUrl.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+    if (match) {
+      const buffer = Buffer.from(match[2], 'base64');
+      fs.writeFileSync(filePath, buffer);
+    }
+  } catch (err) {
+    console.error('Error syncing image to public folder:', err);
+  }
+}
+
 // 2. POST /api/product-images -> Admin updates or resets product image
 app.post('/api/product-images', (req: Request, res: Response) => {
   const { productId, dataUrl } = req.body;
@@ -74,6 +123,7 @@ app.post('/api/product-images', (req: Request, res: Response) => {
   }
 
   saveStoreData(currentStoreData);
+  syncImageToPublicFolder(productId, dataUrl);
   broadcastStoreUpdate();
 
   res.json({
@@ -90,6 +140,7 @@ app.post('/api/store-qr', (req: Request, res: Response) => {
   currentStoreData.qrImage = qrImage || null;
 
   saveStoreData(currentStoreData);
+  syncImageToPublicFolder('khqr_custom', qrImage);
   broadcastStoreUpdate();
 
   res.json({

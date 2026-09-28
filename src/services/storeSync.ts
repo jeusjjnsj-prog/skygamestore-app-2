@@ -1,4 +1,4 @@
-// Service to synchronize product images and store settings in real time across all visitors without redeploying
+import { DEFAULT_PERMANENT_IMAGES, DEFAULT_PERMANENT_QR } from '../data/permanentStoreImages';
 
 export interface StoreSyncData {
   productImages: Record<string, string>;
@@ -11,8 +11,8 @@ class StoreSyncService {
   private listeners: Set<SyncListener> = new Set();
   private eventSource: EventSource | null = null;
   private currentData: StoreSyncData = {
-    productImages: {},
-    qrImage: null,
+    productImages: { ...DEFAULT_PERMANENT_IMAGES },
+    qrImage: DEFAULT_PERMANENT_QR,
   };
 
   constructor() {
@@ -26,7 +26,10 @@ class StoreSyncService {
       const savedImgs = localStorage.getItem('skypro_custom_images');
       const savedQr = localStorage.getItem('skypro_custom_qr');
       if (savedImgs) {
-        this.currentData.productImages = JSON.parse(savedImgs);
+        this.currentData.productImages = {
+          ...DEFAULT_PERMANENT_IMAGES,
+          ...JSON.parse(savedImgs),
+        };
       }
       if (savedQr) {
         this.currentData.qrImage = savedQr;
@@ -108,8 +111,12 @@ class StoreSyncService {
 
   private applySyncData(data: StoreSyncData) {
     this.currentData = {
-      productImages: { ...this.currentData.productImages, ...(data.productImages || {}) },
-      qrImage: data.qrImage !== undefined ? data.qrImage : this.currentData.qrImage,
+      productImages: {
+        ...DEFAULT_PERMANENT_IMAGES,
+        ...this.currentData.productImages,
+        ...(data.productImages || {}),
+      },
+      qrImage: (data.qrImage !== undefined && data.qrImage !== null) ? data.qrImage : (this.currentData.qrImage || DEFAULT_PERMANENT_QR),
     };
 
     // Cache locally as backup
