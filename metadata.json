@@ -1,0 +1,6 @@
+{
+  "name": "SkyPro Store - ហាងកម្មវិធី និងសេវាឌីជីថល",
+  "description": "ហាងកម្មវិធី ហ្គេម VIP និងសេវាកម្មបញ្ចូលលុយហ្គេមឈានមុខគេ - SkyPro Store Cambodia",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
