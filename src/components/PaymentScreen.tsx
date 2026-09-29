@@ -48,6 +48,34 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
   const [customerPhone, setCustomerPhone] = useState(userContact || '');
   const [isEditingPhone, setIsEditingPhone] = useState(false);
 
+  // 15% Discount coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [couponMessage, setCouponMessage] = useState<string>('');
+
+  const applyDiscount = () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setCouponStatus('error');
+      setCouponMessage('សូមបញ្ចូលកូដបញ្ចុះតម្លៃ');
+      return;
+    }
+
+    // Accepts 15, 15%, SKYPRO15, PROMO15, 15OFF, DISCOUNT15, SKYPRO, VIP, etc.
+    if (code.includes('15') || code === 'SKYPRO' || code === 'PROMO' || code === 'VIP' || code === 'DISCOUNT' || code === 'FREE15') {
+      setDiscountPercent(15);
+      setCouponStatus('success');
+      setCouponMessage('ទទួលបានការបញ្ចុះតម្លៃ 15% ជោគជ័យ!');
+    } else {
+      setCouponStatus('error');
+      setCouponMessage('កូដមិនត្រឹមត្រូវ ឬផុតកំណត់');
+    }
+  };
+
+  const discountAmount = (product.price * discountPercent) / 100;
+  const finalPrice = Math.max(0, product.price - discountAmount);
+
   // Custom QR Image synchronized live across all visitors via storeSync
   const [customQrImage, setCustomQrImage] = useState<string | null>(() => {
     return storeSync.getData().qrImage;
@@ -121,7 +149,7 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
       date: new Date().toLocaleString(),
       productTitle: product.titleKhmer,
       duration: product.durations[0]?.label || 'Standard',
-      price: product.price,
+      price: finalPrice,
       paymentMethod: 'ABA KHQR (Bakong)',
       deliveryContact: customerPhone || userContact || '0969749477',
       credentialsOrKey: credentialsText,
@@ -332,11 +360,93 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 </span>
               </div>
 
+              {/* ប្រអប់បញ្ចូលកូដបញ្ចុះតម្លៃ 15% */}
+              <div className="pt-2.5 pb-1 border-t border-dashed border-slate-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                    <Sparkles size={12} className="text-amber-500" />
+                    <span>កូដប្រូម៉ូសិន (Coupon Code)៖</span>
+                  </span>
+
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginRight: '0px' }}>
+                    <input 
+                      type="text" 
+                      id="coupon-code" 
+                      value={couponCode}
+                      onChange={(e) => {
+                        setCouponCode(e.target.value);
+                        if (couponStatus !== 'idle') {
+                          setCouponStatus('idle');
+                          setCouponMessage('');
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          applyDiscount();
+                        }
+                      }}
+                      placeholder="កូដបញ្ចុះតម្លៃ 15%" 
+                      style={{
+                        padding: '8px 12px',
+                        border: discountPercent > 0 ? '1.5px solid #10b981' : '1.5px solid #cbd5e1',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        textTransform: 'uppercase',
+                        outline: 'none',
+                        width: '140px',
+                        backgroundColor: '#ffffff'
+                      }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={applyDiscount} 
+                      style={{
+                        padding: '8px 14px',
+                        backgroundColor: discountPercent > 0 ? '#10b981' : '#0284c7',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '8px',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {discountPercent > 0 ? 'បានប្រើ ✓' : 'ប្រើកូដ'}
+                    </button>
+                  </div>
+                </div>
+
+                {couponMessage && (
+                  <div className={`mt-1.5 text-[11px] font-bold flex items-center gap-1 ${
+                    couponStatus === 'success' ? 'text-emerald-600' : 'text-red-500'
+                  }`}>
+                    <span>{couponStatus === 'success' ? '✓' : '⚠'}</span>
+                    <span>{couponMessage}</span>
+                  </div>
+                )}
+              </div>
+
+              {discountPercent > 0 && (
+                <div className="flex items-center justify-between text-emerald-600 font-semibold text-xs pt-1">
+                  <span>បញ្ចុះតម្លៃពិសេស (15%)៖</span>
+                  <span className="font-bold">-${discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+
               <div className="pt-2 border-t border-dashed border-slate-200 flex items-center justify-between">
                 <span className="font-bold text-slate-900 text-sm">ទឹកប្រាក់ត្រូវទូទាត់សរុប៖</span>
-                <span className="text-xl sm:text-2xl font-black text-slate-900">
-                  ${product.price.toFixed(2)}
-                </span>
+                <div className="flex items-baseline gap-2">
+                  {discountPercent > 0 && (
+                    <span className="text-sm font-semibold text-slate-400 line-through">
+                      ${product.price.toFixed(2)}
+                    </span>
+                  )}
+                  <span className="text-xl sm:text-2xl font-black text-slate-900">
+                    ${finalPrice.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
 

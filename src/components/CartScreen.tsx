@@ -1,5 +1,5 @@
-import React from 'react';
-import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingCart, Trash2, Plus, Minus, Sparkles } from 'lucide-react';
 import { CartItem } from '../types';
 import { ProductImage } from './ProductImage';
 
@@ -20,7 +20,32 @@ export const CartScreen: React.FC<CartScreenProps> = ({
   onProceedCheckout,
   customImages = {},
 }) => {
-  const totalUsd = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // 15% Discount coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [couponStatus, setCouponStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [couponMessage, setCouponMessage] = useState<string>('');
+
+  const applyDiscount = () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setCouponStatus('error');
+      setCouponMessage('សូមបញ្ចូលកូដបញ្ចុះតម្លៃ');
+      return;
+    }
+    if (code.includes('15') || code === 'SKYPRO' || code === 'PROMO' || code === 'VIP' || code === 'DISCOUNT' || code === 'FREE15') {
+      setDiscountPercent(15);
+      setCouponStatus('success');
+      setCouponMessage('ទទួលបានការបញ្ចុះតម្លៃ 15% ជោគជ័យ!');
+    } else {
+      setCouponStatus('error');
+      setCouponMessage('កូដមិនត្រឹមត្រូវ ឬផុតកំណត់');
+    }
+  };
+
+  const baseTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discountAmount = (baseTotal * discountPercent) / 100;
+  const totalUsd = Math.max(0, baseTotal - discountAmount);
 
   return (
     <div className="space-y-4 font-['Kantumruy_Pro',sans-serif] px-4 py-3 pb-28">
@@ -117,6 +142,74 @@ export const CartScreen: React.FC<CartScreenProps> = ({
             ))}
           </div>
 
+          {/* ប្រអប់បញ្ចូលកូដបញ្ចុះតម្លៃ 15% */}
+          <div className="bg-white rounded-2xl p-3.5 border border-slate-200/90 shadow-2xs space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-amber-500" />
+                <span>កូដបញ្ចុះតម្លៃ 15% (Coupon):</span>
+              </span>
+
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <input 
+                  type="text" 
+                  id="coupon-code" 
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value);
+                    if (couponStatus !== 'idle') {
+                      setCouponStatus('idle');
+                      setCouponMessage('');
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      applyDiscount();
+                    }
+                  }}
+                  placeholder="កូដបញ្ចុះតម្លៃ 15%" 
+                  style={{
+                    padding: '8px 12px',
+                    border: discountPercent > 0 ? '1.5px solid #10b981' : '1.5px solid #cbd5e1',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    textTransform: 'uppercase',
+                    outline: 'none',
+                    width: '140px',
+                    backgroundColor: '#ffffff'
+                  }}
+                />
+                <button 
+                  type="button" 
+                  onClick={applyDiscount} 
+                  style={{
+                    padding: '8px 14px',
+                    backgroundColor: discountPercent > 0 ? '#10b981' : '#0284c7',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {discountPercent > 0 ? 'បានប្រើ ✓' : 'ប្រើកូដ'}
+                </button>
+              </div>
+            </div>
+
+            {couponMessage && (
+              <div className={`text-xs font-semibold flex items-center gap-1 ${
+                couponStatus === 'success' ? 'text-emerald-600' : 'text-red-500'
+              }`}>
+                <span>{couponStatus === 'success' ? '✓' : '⚠'}</span>
+                <span>{couponMessage}</span>
+              </div>
+            )}
+          </div>
+
           {/* Continue Shopping button matching IMG_1190.png */}
           <button
             onClick={onContinueShopping}
@@ -134,9 +227,21 @@ export const CartScreen: React.FC<CartScreenProps> = ({
             {/* Total Section */}
             <div className="flex flex-col">
               <span className="text-[11px] text-slate-500 font-medium">សរុប</span>
-              <span className="text-2xl font-black text-[#2563eb] leading-tight">
-                ${totalUsd.toFixed(2)}
-              </span>
+              <div className="flex items-baseline gap-1.5">
+                {discountPercent > 0 && (
+                  <span className="text-xs font-semibold text-slate-400 line-through">
+                    ${baseTotal.toFixed(2)}
+                  </span>
+                )}
+                <span className="text-2xl font-black text-[#2563eb] leading-tight">
+                  ${totalUsd.toFixed(2)}
+                </span>
+                {discountPercent > 0 && (
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
+                    -15%
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* "គិតលុយ" Button -> Triggers QR Code Screen */}
