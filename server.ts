@@ -68,7 +68,7 @@ app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 const sseClients = new Set<Response>();
 
 function broadcastStoreUpdate() {
-  const payload = `data: ${JSON.stringify({ type: 'sync', data: currentStoreData })}\n\n`;
+  const payload = `data: ${JSON.stringify({ type: 'sync', data: currentStoreData, timestamp: Date.now() })}\n\n`;
   for (const client of sseClients) {
     try {
       client.write(payload);
@@ -78,11 +78,25 @@ function broadcastStoreUpdate() {
   }
 }
 
-// 1. GET /api/store-data -> Fetch all images and store config
+// Serve public images with aggressive anti-cache headers
+const publicImagesPath = path.resolve(process.cwd(), 'public', 'images');
+app.use('/images', express.static(publicImagesPath, {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
+}));
+
+// 1. GET /api/store-data -> Fetch all images and store config with no-cache
 app.get('/api/store-data', (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.json({
     success: true,
     data: currentStoreData,
+    timestamp: Date.now(),
   });
 });
 

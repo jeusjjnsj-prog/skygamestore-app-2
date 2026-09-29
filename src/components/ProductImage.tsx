@@ -1,18 +1,27 @@
 import React from 'react';
 import { Sparkles, Shield, Cpu, Zap } from 'lucide-react';
+import { appendCacheBuster } from '../utils/imageStore';
 
 interface ProductImageProps {
   type: string;
   className?: string;
   customSrc?: string | null;
+  timestamp?: number;
 }
 
-export const ProductImage: React.FC<ProductImageProps> = ({ type, className = '', customSrc }) => {
+export const ProductImage: React.FC<ProductImageProps> = ({ 
+  type, 
+  className = '', 
+  customSrc,
+  timestamp
+}) => {
   if (customSrc) {
+    const finalUrl = appendCacheBuster(customSrc, timestamp);
     return (
       <div className={`relative w-full h-full overflow-hidden bg-slate-100 flex items-center justify-center ${className}`}>
         <img 
-          src={customSrc} 
+          key={`${customSrc.slice(0, 32)}-${timestamp || 'default'}`}
+          src={finalUrl} 
           alt="Product" 
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
         />

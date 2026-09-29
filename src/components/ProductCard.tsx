@@ -9,6 +9,7 @@ interface ProductCardProps {
   onSelectProduct?: (product: Product) => void;
   onAddToCart?: (product: Product) => void;
   customImage?: string | null;
+  imageTimestamp?: number;
   onUpdateCustomImage?: (productId: string, dataUrl: string | null) => void;
   isAdmin?: boolean;
 }
@@ -18,6 +19,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onBuyNow,
   onSelectProduct,
   customImage,
+  imageTimestamp,
   onUpdateCustomImage,
   isAdmin = false,
 }) => {
@@ -42,6 +44,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         }
       };
       reader.readAsDataURL(file);
+    }
+    // Clear input so selecting the same file again triggers onChange
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -95,7 +101,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        <ProductImage type={product.imageType} customSrc={customImage} />
+        <ProductImage 
+          type={product.imageType} 
+          customSrc={customImage} 
+          timestamp={imageTimestamp}
+        />
       </div>
 
       {/* Product Details Section */}

@@ -21,6 +21,7 @@ import {
 import { Product, OrderItem } from '../types';
 import { ProductImage } from './ProductImage';
 import { storeSync } from '../services/storeSync';
+import { appendCacheBuster } from '../utils/imageStore';
 
 interface PaymentScreenProps {
   product: Product;
@@ -51,17 +52,19 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
   const [customQrImage, setCustomQrImage] = useState<string | null>(() => {
     return storeSync.getData().qrImage;
   });
+  const [qrTimestamp, setQrTimestamp] = useState<number>(() => storeSync.getLastUpdated());
 
   useEffect(() => {
-    const unsub = storeSync.subscribe((data) => {
+    const unsub = storeSync.subscribe((data, ts) => {
       setCustomQrImage(data.qrImage);
+      setQrTimestamp(ts || Date.now());
     });
     return unsub;
   }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle uploading custom QR image from device
+  // Handle uploading custom QR image from device with instant state update & cache busting
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -69,15 +72,24 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
       reader.onload = async (event) => {
         const result = event.target?.result as string;
         if (result) {
+          const now = Date.now();
+          setQrTimestamp(now);
+          setCustomQrImage(result);
           await storeSync.updateStoreQr(result);
         }
       };
       reader.readAsDataURL(file);
     }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleResetQrImage = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    const now = Date.now();
+    setQrTimestamp(now);
+    setCustomQrImage(null);
     await storeSync.updateStoreQr(null);
   };
 
@@ -220,11 +232,12 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
 
             {/* 1. Large & Clear Product Showcase */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-br from-slate-50/90 to-blue-50/40 border border-slate-200/70 flex items-center gap-3.5 sm:gap-4.5">
-              {/* Product Image */}
+              {/* Product Image with cache busting */}
               <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-26 md:h-26 rounded-2xl overflow-hidden bg-white border border-slate-200 shrink-0 shadow-sm flex items-center justify-center p-1">
                 <ProductImage
                   type={product.imageType}
                   customSrc={customProductImage}
+                  timestamp={qrTimestamp}
                   className="w-full h-full rounded-xl object-contain"
                 />
               </div>
@@ -342,7 +355,8 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
                   {customQrImage ? (
                     <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-68 md:h-68 flex items-center justify-center overflow-hidden rounded-xl bg-white">
                       <img
-                        src={customQrImage}
+                        key={`${customQrImage.slice(0, 32)}-${qrTimestamp}`}
+                        src={appendCacheBuster(customQrImage, qrTimestamp)}
                         alt="Custom ABA KHQR Code"
                         className="w-full h-full object-contain"
                       />

@@ -24,6 +24,7 @@ interface ProductDetailScreenProps {
   cartCount: number;
   onOpenCart: () => void;
   customImage?: string | null;
+  imageTimestamp?: number;
   onUpdateCustomImage?: (productId: string, dataUrl: string | null) => void;
   isAdmin?: boolean;
 }
@@ -36,6 +37,7 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
   cartCount,
   onOpenCart,
   customImage,
+  imageTimestamp,
   onUpdateCustomImage,
   isAdmin = false,
 }) => {
@@ -209,6 +211,7 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
                     };
                     reader.readAsDataURL(file);
                   }
+                  e.target.value = '';
                 }}
               />
             </div>
@@ -217,6 +220,7 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
           <ProductImage 
             type={product.imageType} 
             customSrc={customImage} 
+            timestamp={imageTimestamp}
             className="w-full aspect-[4/3] rounded-2xl" 
           />
         </div>

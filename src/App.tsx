@@ -15,6 +15,7 @@ import { PaymentScreen } from './components/PaymentScreen';
 import { CartScreen } from './components/CartScreen';
 import { LoginScreen } from './components/LoginScreen';
 import { DrawerMenu } from './components/DrawerMenu';
+import { BannerSlider } from './components/BannerSlider';
 import { PRODUCTS } from './data/products';
 import { Product, CartItem, OrderItem, TabType } from './types';
 import { 
@@ -35,17 +36,41 @@ export default function App() {
   const [customImages, setCustomImages] = useState<Record<string, string>>(() => {
     return storeSync.getData().productImages;
   });
+  const [imageTimestamp, setImageTimestamp] = useState<number>(() => storeSync.getLastUpdated());
 
   useEffect(() => {
-    const unsubscribe = storeSync.subscribe((data) => {
-      setCustomImages(data.productImages);
+    const unsubscribe = storeSync.subscribe((data, ts) => {
+      setCustomImages({ ...data.productImages });
+      setImageTimestamp(ts || Date.now());
     });
     return unsubscribe;
   }, []);
 
   const handleUpdateCustomImage = async (productId: string, dataUrl: string | null) => {
+    const now = Date.now();
+    setImageTimestamp(now);
+
+    // 1. Instant local state update (0ms) so front page updates in real-time
+    setCustomImages((prev) => {
+      const updated = { ...prev };
+      if (dataUrl) {
+        updated[productId] = dataUrl;
+      } else {
+        delete updated[productId];
+      }
+      return updated;
+    });
+
+    // 2. Persist to server & broadcast
     await storeSync.updateProductImage(productId, dataUrl);
-    showToast(dataUrl ? 'បានប្តូររូបភាពផលិតផលជោគជ័យ (ភ្ញៀវទាំងអស់ឃើញភ្លាមៗ)!' : 'បានកំណត់រូបភាពដើមឡើងវិញ!');
+
+    // 3. Trigger 1-second auto-fetch to guarantee front-page visitor synchronization
+    setTimeout(async () => {
+      await storeSync.forceRefresh();
+      setImageTimestamp(Date.now());
+    }, 1000);
+
+    showToast(dataUrl ? 'បានប្តូររូបភាពថ្មីជោគជ័យ (ទំព័រមុខបង្ហាញភ្លាមៗ)!' : 'បានកំណត់រូបភាពដើមឡើងវិញ!');
   };
 
   // Cart state
@@ -330,6 +355,7 @@ export default function App() {
             setActiveTab('cart');
           }}
           customImage={customImages[viewingProduct.id]}
+          imageTimestamp={imageTimestamp}
           onUpdateCustomImage={handleUpdateCustomImage}
           isAdmin={isAdmin}
         />
@@ -363,35 +389,19 @@ export default function App() {
         <main className="flex-1">
           {activeTab === 'home' && (
             <div className="px-2.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
-              {/* Hero Banner */}
-              <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-800 p-5 sm:p-8 text-white shadow-md">
-                <div className="relative z-10 max-w-sm">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-semibold text-blue-100 mb-3 border border-white/20">
-                    <Sparkles size={12} className="text-yellow-300" />
-                    <span>សេវាកម្មឌីជីថលសុទ្ធ ១០០%</span>
-                  </div>
-
-                  <h1 className="text-xl sm:text-2xl font-extrabold leading-snug tracking-tight">
-                    គណនី AI & កម្មវិធីកាត់តគុណភាពខ្ពស់
-                  </h1>
-
-                  <p className="mt-2 text-xs sm:text-sm text-blue-100/90 leading-relaxed">
-                    Gemini AI Pro, CapCut Pro, Grok, ChatGPT Plus ធានាការប្រើប្រាស់ពេញលេញ
-                  </p>
-
-                  <button
-                    onClick={() => setActiveTab('products')}
-                    className="mt-4 px-4 py-2 rounded-2xl bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs shadow-sm transition-all active:scale-95 flex items-center gap-2 cursor-pointer"
-                  >
-                    <span>មើលទំនិញទាំងអស់</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-
-                {/* Decorative background shapes */}
-                <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl"></div>
-                <div className="absolute right-8 top-6 w-24 h-24 rounded-full bg-blue-400/20 blur-lg"></div>
-              </div>
+              {/* Image Banner Slider with Auto-slide, Touch Swipe & Arrows */}
+              <BannerSlider
+                onSelectProduct={(productId) => {
+                  const targetProd = PRODUCTS.find((p) => p.id === productId);
+                  if (targetProd) {
+                    setViewingProduct(targetProd);
+                  } else {
+                    setActiveTab('products');
+                  }
+                }}
+                onExploreAll={() => setActiveTab('products')}
+                products={PRODUCTS}
+              />
 
               {/* Section Header */}
               <div className="flex items-center justify-between pt-2">
@@ -420,32 +430,37 @@ export default function App() {
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[11px] sm:gap-4 md:gap-5 lg:gap-6 pt-1">
                 {homeFeaturedProducts.map((product) => (
                   <ProductCard
-                    key={product.id}
+                    key={`${product.id}-${imageTimestamp}`}
                     product={product}
                     onBuyNow={(prod) => handleBuyNow(prod)}
                     onSelectProduct={(prod) => setViewingProduct(prod)}
                     onAddToCart={(prod) => handleAddToCart(prod)}
                     customImage={customImages[product.id]}
+                    imageTimestamp={imageTimestamp}
                     onUpdateCustomImage={handleUpdateCustomImage}
                     isAdmin={isAdmin}
                   />
                 ))}
               </div>
 
-              {/* More Subscriptions Banner */}
-              <div className="mt-6 p-4 rounded-3xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex items-center justify-between shadow-2xs">
+              {/* More Subscriptions Banner with SkyPro Logo colors */}
+              <div className="mt-6 p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-950 via-[#070e28] to-slate-900 border border-cyan-500/20 text-white flex items-center justify-between shadow-sm">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">
-                    Canva Pro, ChatGPT, Netflix & YouTube
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-[#00e5ff] animate-ping" />
+                    <span className="text-[11px] font-semibold text-cyan-300">សេវាកម្មពេញនិយម</span>
+                  </div>
+                  <h3 className="font-bold text-white text-xs sm:text-sm">
+                    Canva Pro, ChatGPT, CapCut & Gemini AI
                   </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
+                  <p className="text-[10px] sm:text-[11px] text-slate-300/80 mt-0.5">
                     មានក្នុងស្តុកស្រាប់ ធានាដូរថ្មី ១០០% ប្រគល់ជូនស្វ័យប្រវត្តិ
                   </p>
                 </div>
 
                 <button
                   onClick={() => setActiveTab('products')}
-                  className="py-2 px-3.5 rounded-xl bg-[#4344e6] hover:bg-[#3839d4] text-white text-xs font-medium shadow-xs transition-all active:scale-95 cursor-pointer"
+                  className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-[#0052fe] to-[#00d2ff] hover:from-[#0047dc] hover:to-[#00bfe6] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer shrink-0 ml-2"
                 >
                   មើលបន្ថែម
                 </button>
@@ -503,12 +518,13 @@ export default function App() {
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[11px] sm:gap-4 md:gap-5 lg:gap-6 pt-1">
                 {filteredProducts.map((product) => (
                   <ProductCard
-                    key={product.id}
+                    key={`${product.id}-${imageTimestamp}`}
                     product={product}
                     onBuyNow={(prod) => handleBuyNow(prod)}
                     onSelectProduct={(prod) => setViewingProduct(prod)}
                     onAddToCart={(prod) => handleAddToCart(prod)}
                     customImage={customImages[product.id]}
+                    imageTimestamp={imageTimestamp}
                     onUpdateCustomImage={handleUpdateCustomImage}
                     isAdmin={isAdmin}
                   />
