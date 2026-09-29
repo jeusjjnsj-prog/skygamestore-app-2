@@ -1,4 +1,4 @@
-export type TabType = 'home' | 'products' | 'cart' | 'account';
+export type TabType = 'home' | 'products' | 'cart' | 'account' | 'help';
 
 export interface Product {
   id: string;
@@ -6,10 +6,11 @@ export interface Product {
   titleEn: string;
   price: number;
   salesCount: string;
-  category: 'ai' | 'design' | 'streaming' | 'social';
-  imageType: 'gemini-banner' | 'gemini-logo' | 'capcut' | 'grok' | 'chatgpt' | 'canva' | 'netflix' | 'youtube';
+  category: 'ai' | 'design' | 'streaming' | 'social' | 'tools';
+  imageType: string;
   imageUrl?: string;
   badge?: string;
+  tag?: string;
   descriptionKhmer: string;
   deliveryType: 'email' | 'credentials' | 'telegram';
   deliveryPlaceholder: string;

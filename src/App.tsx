@@ -14,6 +14,7 @@ import { ProductDetailScreen } from './components/ProductDetailScreen';
 import { PaymentScreen } from './components/PaymentScreen';
 import { CartScreen } from './components/CartScreen';
 import { LoginScreen } from './components/LoginScreen';
+import { HelpScreen } from './components/HelpScreen';
 import { DrawerMenu } from './components/DrawerMenu';
 import { BannerSlider } from './components/BannerSlider';
 import { PRODUCTS } from './data/products';
@@ -327,8 +328,8 @@ export default function App() {
     return matchCat && matchSearch;
   });
 
-  // Top 4 exact products for Home Screen
-  const homeFeaturedProducts = PRODUCTS.slice(0, 4);
+  // Products for Home Screen grid, dynamically filtered by search or category if active
+  const homeFeaturedProducts = filteredProducts;
 
   const totalCartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
@@ -383,6 +384,7 @@ export default function App() {
             setActiveTab('cart');
           }}
           onOpenDrawer={() => setIsDrawerOpen(true)}
+          onOpenAccount={() => setActiveTab('account')}
         />
 
         {/* Main Tab Content */}
@@ -402,6 +404,52 @@ export default function App() {
                 onExploreAll={() => setActiveTab('products')}
                 products={PRODUCTS}
               />
+
+              {/* Compact Search & Category bar directly below Banner */}
+              <div className="space-y-2.5 pt-0.5">
+                <div className="relative">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="ស្វែងរក Gemini, CapCut, Canva, Grok, ChatGPT..."
+                    className="w-full pl-9 pr-8 py-2 sm:py-2.5 rounded-2xl bg-white border border-slate-200/90 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all font-['Kantumruy_Pro']"
+                  />
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Quick Categories Bar */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+                  {[
+                    { id: 'all', label: 'ទាំងអស់' },
+                    { id: 'ai', label: '🤖 AI Pro' },
+                    { id: 'streaming', label: '🎵 ចម្រៀង & កុន' },
+                    { id: 'social', label: '🔥 Social VIP' },
+                    { id: 'tools', label: '📚 រៀនភាសា & Tools' },
+                    { id: 'design', label: '🎬 កាត់ត & រចនា' }
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.id)}
+                      className={`shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 cursor-pointer font-['Kantumruy_Pro'] ${
+                        selectedCategory === cat.id
+                          ? 'bg-[#2563eb] text-white shadow-xs'
+                          : 'bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Section Header */}
               <div className="flex items-center justify-between pt-2">
@@ -443,24 +491,24 @@ export default function App() {
                 ))}
               </div>
 
-              {/* More Subscriptions Banner with SkyPro Logo colors */}
-              <div className="mt-6 p-4 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-slate-950 via-[#070e28] to-slate-900 border border-cyan-500/20 text-white flex items-center justify-between shadow-sm">
+              {/* More Subscriptions Info Bar - Clean White / Glassmorphism */}
+              <div className="mt-6 p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-md border border-slate-200/80 text-slate-900 flex items-center justify-between shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-slate-300 transition-all">
                 <div>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span className="w-2 h-2 rounded-full bg-[#00e5ff] animate-ping" />
-                    <span className="text-[11px] font-semibold text-cyan-300">សេវាកម្មពេញនិយម</span>
+                    <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
+                    <span className="text-[11px] font-bold text-blue-600">សេវាកម្មពេញនិយម</span>
                   </div>
-                  <h3 className="font-bold text-white text-xs sm:text-sm">
+                  <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                     Canva Pro, ChatGPT, CapCut & Gemini AI
                   </h3>
-                  <p className="text-[10px] sm:text-[11px] text-slate-300/80 mt-0.5">
+                  <p className="text-[10.5px] sm:text-[11.5px] text-slate-500 mt-0.5 font-medium">
                     មានក្នុងស្តុកស្រាប់ ធានាដូរថ្មី ១០០% ប្រគល់ជូនស្វ័យប្រវត្តិ
                   </p>
                 </div>
 
                 <button
                   onClick={() => setActiveTab('products')}
-                  className="py-2 px-3.5 rounded-xl bg-gradient-to-r from-[#0052fe] to-[#00d2ff] hover:from-[#0047dc] hover:to-[#00bfe6] text-white text-xs font-semibold shadow-xs transition-all active:scale-95 cursor-pointer shrink-0 ml-2"
+                  className="py-2 px-4 rounded-xl bg-gradient-to-r from-[#4f46e5] via-[#2563eb] to-[#0284c7] hover:from-[#4338ca] hover:to-[#0369a1] text-white text-xs font-bold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer shrink-0 ml-2 app-button-press"
                 >
                   មើលបន្ថែម
                 </button>
@@ -497,13 +545,15 @@ export default function App() {
                 {[
                   { id: 'all', label: 'ទាំងអស់ (All)' },
                   { id: 'ai', label: '🤖 AI & Gemini' },
-                  { id: 'design', label: '🎬 កាត់ត & រចនា' },
-                  { id: 'streaming', label: '🍿 មើលកុន & ចម្រៀង' }
+                  { id: 'streaming', label: '🎵 ចម្រៀង & កុន' },
+                  { id: 'social', label: '🔥 Social VIP' },
+                  { id: 'tools', label: '📚 រៀនភាសា & Tools' },
+                  { id: 'design', label: '🎬 កាត់ត & រចនា' }
                 ].map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 cursor-pointer font-['Kantumruy_Pro'] ${
                       selectedCategory === cat.id
                         ? 'bg-[#4344e6] text-white shadow-xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -556,6 +606,14 @@ export default function App() {
                 />
               )}
             </div>
+          )}
+
+          {/* Help Tab: ជំនួយ & ទំនាក់ទំនង */}
+          {activeTab === 'help' && (
+            <HelpScreen
+              isLoggedIn={isLoggedIn}
+              onOpenAccount={() => setActiveTab('account')}
+            />
           )}
 
           {/* Account Tab: Register / Login / Isolated Order History */}

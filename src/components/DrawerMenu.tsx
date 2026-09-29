@@ -106,7 +106,21 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
             >
               <div className="flex items-center gap-2.5">
                 <ShoppingBag size={16} className="text-emerald-600" />
-                <span>ប្រវត្តិបញ្ជាទិញ & កូដគណនី</span>
+                <span>ប្រវត្តិបញ្ជាទិញ & គណនី</span>
+              </div>
+              <ChevronRight size={14} className="text-slate-400" />
+            </button>
+
+            <button
+              onClick={() => {
+                onNavigateTab('help');
+                onClose();
+              }}
+              className="w-full p-2.5 rounded-2xl flex items-center justify-between text-slate-800 hover:bg-blue-50 hover:text-blue-600 transition-colors font-medium"
+            >
+              <div className="flex items-center gap-2.5">
+                <Headphones size={16} className="text-blue-600" />
+                <span>មជ្ឈមណ្ឌលជំនួយ & FAQs</span>
               </div>
               <ChevronRight size={14} className="text-slate-400" />
             </button>
@@ -122,7 +136,7 @@ export const DrawerMenu: React.FC<DrawerMenuProps> = ({
               មានបញ្ហាទាក់ទងនឹងការបញ្ជាទិញ ឬត្រូវការជំនួយ អាចទាក់ទងមកកាន់ Admin បានគ្រប់ពេល ២៤/៧
             </p>
             <a
-              href="https://t.me/"
+              href="https://t.me/skyprostore"
               target="_blank"
               rel="noreferrer"
               className="block w-full py-2 text-center text-xs font-bold text-white bg-[#229ed9] hover:bg-[#1e8bc0] rounded-xl shadow-xs transition-colors"

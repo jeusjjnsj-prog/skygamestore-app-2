@@ -59,12 +59,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div className="w-full bg-white rounded-[14px] p-2.5 sm:p-3.5 border border-[#38bdf8] shadow-[0_2px_10px_rgba(56,189,248,0.14)] hover:shadow-[0_8px_22px_rgba(56,189,248,0.22)] flex flex-col justify-between transition-all duration-200 font-['Kantumruy_Pro'] relative group select-none">
+    <div 
+      onClick={handleOpenDetail}
+      className="w-full h-full bg-white rounded-[18px] p-2.5 sm:p-3.5 border border-slate-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.02)] hover:shadow-[0_10px_24px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.03)] hover:border-slate-300 flex flex-col justify-between transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.975] active:translate-y-0 font-['Kantumruy_Pro'] relative group select-none cursor-pointer app-card-motion"
+    >
       
-      {/* Product Image Box with aspect-ratio: 1/1 and min-height: 130px on mobile */}
+      {/* Product Image Box with uniform 1:1 aspect-ratio */}
       <div 
-        onClick={handleOpenDetail}
-        className="w-full aspect-square min-h-[130px] sm:aspect-[4/3] sm:min-h-[170px] lg:h-[185px] rounded-[10px] sm:rounded-xl overflow-hidden relative cursor-pointer shrink-0 bg-slate-50 transition-transform active:scale-[0.98]"
+        className="w-full aspect-square rounded-[14px] overflow-hidden relative shrink-0 bg-slate-50 transition-transform duration-300 ease-out border border-slate-100/60"
       >
         {/* Change Image Button - ONLY VISIBLE TO MASTER ADMIN (0969749477) */}
         {isAdmin && (
@@ -101,6 +103,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
+        {/* Product Tag Badge (e.g. AI កំពូលឆ្លាត ⚡, ស្តាប់ចម្រៀង VIP 🎵, ពេញនិយម 🔥, រៀនភាសា 📚) */}
+        {product.tag && (
+          <div className="absolute top-1.5 right-1.5 z-10 px-2 py-0.5 rounded-full bg-white/95 text-slate-800 text-[8.5px] sm:text-[9.5px] font-bold border border-slate-200/90 shadow-2xs backdrop-blur-xs flex items-center gap-1">
+            <span>{product.tag}</span>
+          </div>
+        )}
+
         <ProductImage 
           type={product.imageType} 
           customSrc={customImage} 
@@ -108,36 +117,40 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         />
       </div>
 
-      {/* Product Details Section */}
-      <div className="pt-2 sm:pt-2.5 flex flex-col flex-1 justify-between min-h-0">
+      {/* Product Details Section - Uniformly sized and aligned */}
+      <div className="pt-2.5 flex flex-col flex-1 justify-between min-h-0">
         <div>
-          {/* Title with 2-line clamp */}
+          {/* Title with standardized 2-line height */}
           <h3 
             onClick={handleOpenDetail}
-            className="font-medium text-slate-800 text-[11.5px] sm:text-[14px] leading-snug line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors min-h-[28px] sm:min-h-[38px]"
+            className="font-semibold text-slate-800 text-[12px] sm:text-[14px] leading-snug line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors h-[34px] sm:h-[40px] flex items-start"
             title={product.titleKhmer}
           >
             {product.titleKhmer}
           </h3>
 
           {/* Price & Sales Row */}
-          <div className="mt-1 sm:mt-1.5 flex items-baseline justify-between">
-            <span className="text-[14.5px] sm:text-[20px] font-bold text-[#2563eb] tracking-tight">
+          <div className="mt-1.5 flex items-baseline justify-between">
+            <span className="text-[16px] sm:text-[21px] font-black text-[#2563eb] tracking-tight">
               ${product.price.toFixed(2)}
             </span>
-            <div className="flex items-center gap-0.5 text-[9px] sm:text-[11px] text-slate-500 font-normal">
-              <span className="text-amber-500 text-[10px] sm:text-xs">🔥</span>
+            <div className="flex items-center gap-1 text-[9.5px] sm:text-[11px] text-slate-500 font-medium bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">
+              <span className="text-amber-500 text-[10px]">🔥</span>
               <span>{product.salesCount}</span>
             </div>
           </div>
         </div>
 
-        {/* Action Button - Royal Blue */}
+        {/* Action Button - "ទិញភ្លាម ⚡" with Indigo to Sky Blue gradient matching Hero Banner */}
         <button
-          onClick={() => onBuyNow(product)}
-          className="w-full h-[30px] sm:h-[38px] rounded-lg sm:rounded-xl bg-[#4344e6] hover:bg-[#3839d6] text-white font-medium text-[11.5px] sm:text-[13px] shadow-xs active:scale-[0.98] transition-all flex items-center justify-center font-['Kantumruy_Pro'] cursor-pointer mt-1.5 sm:mt-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            onBuyNow(product);
+          }}
+          className="w-full h-[34px] sm:h-[40px] rounded-xl bg-gradient-to-r from-[#4f46e5] via-[#2563eb] to-[#0284c7] hover:from-[#4338ca] hover:to-[#0369a1] text-white font-bold text-[12px] sm:text-[13.5px] shadow-sm hover:shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 font-['Kantumruy_Pro'] cursor-pointer mt-2 app-button-press"
         >
-          ទិញឥឡូវ
+          <span>ទិញភ្លាម</span>
+          <span className="text-amber-300 font-black">⚡</span>
         </button>
       </div>
     </div>

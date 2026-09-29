@@ -142,8 +142,8 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-['Kantumruy_Pro',sans-serif] pb-24">
-      {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3 flex items-center justify-between shadow-xs">
+      {/* Top Header with Glass Effect */}
+      <header className="sticky top-0 z-30 glass-header px-4 py-3 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.03)] font-['Kantumruy_Pro']">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 text-xs font-medium text-slate-700 hover:text-blue-600 transition-colors p-1 rounded-xl hover:bg-slate-100 active:scale-95"
@@ -342,8 +342,8 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
         </div>
       </div>
 
-      {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 px-4 py-2.5 shadow-[0_-4px_25px_rgba(0,0,0,0.06)]">
+      {/* Fixed Bottom Action Bar with Glass Effect */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 glass-bottom-nav px-4 py-2.5 shadow-[0_-8px_32px_rgba(0,0,0,0.06)] font-['Kantumruy_Pro']">
         <div className="max-w-md mx-auto sm:max-w-xl md:max-w-2xl flex items-center justify-between gap-3">
           {/* Price Preview */}
           <div className="flex flex-col">
@@ -365,9 +365,10 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
 
             <button
               onClick={() => onBuyNow(product, selectedDurationIndex)}
-              className="py-2.5 px-5 rounded-xl bg-[#4344e6] hover:bg-[#3839d6] text-white text-[13px] font-medium shadow-xs transition-all active:scale-[0.98] flex items-center justify-center min-w-[120px]"
+              className="py-2.5 px-5 rounded-xl bg-gradient-to-r from-[#4f46e5] via-[#2563eb] to-[#0284c7] hover:from-[#4338ca] hover:to-[#0369a1] text-white text-[13px] font-bold shadow-md shadow-blue-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 min-w-[120px] cursor-pointer app-button-press"
             >
-              ទិញឥឡូវ
+              <span>ទិញភ្លាម</span>
+              <span className="text-amber-300 font-black">⚡</span>
             </button>
           </div>
         </div>

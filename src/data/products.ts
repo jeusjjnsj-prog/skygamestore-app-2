@@ -190,5 +190,109 @@ export const PRODUCTS: Product[] = [
       { label: '3 ខែ', price: 3.80 },
       { label: '1 ខែ', price: 1.50 }
     ]
+  },
+  {
+    id: 'claude-3-5-sonnet-1m',
+    titleKhmer: 'Claude 3.5 Sonnet Pro (1 ខែ)',
+    titleEn: 'Claude 3.5 Sonnet Pro (1 Month)',
+    price: 5.00,
+    salesCount: '1.8k',
+    tag: 'AI កំពូលឆ្លាត ⚡',
+    badge: 'AI កំពូលឆ្លាត ⚡',
+    category: 'ai',
+    imageType: 'claude',
+    descriptionKhmer: 'គណនី Claude Pro ដំណើរការម៉ូដែល Claude 3.5 Sonnet & Claude 3.5 Haiku ដោយ Anthropic។ ឆ្លាតវៃបំផុតផ្នែក Coding, សរសេរតែងសេចក្តី, វិភាគទិន្នន័យ 200K Context Window និងបង្កើត Artifacts Interactive Apps ភ្លាមៗ។',
+    deliveryType: 'credentials',
+    deliveryPlaceholder: 'Telegram Username ឬ Email សម្រាប់ទទួលគណនី',
+    features: [
+      'Claude 3.5 Sonnet & Haiku AI Model',
+      '200K Context Window វិភាគឯកសារធំៗ',
+      'Anthropic Artifacts ដំណើរការ Code & Apps ផ្ទាល់',
+      'សមត្ថភាពសរសេរកូដ និងវិភាគទិន្នន័យលំដាប់ពិភពលោក',
+      'ធានាដូរថ្មីភ្លាមៗប្រសិនបើមានបញ្ហា'
+    ],
+    durations: [
+      { label: '1 ខែ (30 ថ្ងៃ)', price: 5.00, popular: true },
+      { label: '3 ខែ (90 ថ្ងៃ)', price: 13.50 },
+      { label: '6 ខែ (180 ថ្ងៃ)', price: 25.00 }
+    ]
+  },
+  {
+    id: 'spotify-premium-3m',
+    titleKhmer: 'Spotify Premium (3 ខែ)',
+    titleEn: 'Spotify Premium (3 Months)',
+    price: 3.00,
+    salesCount: '3.4k',
+    tag: 'ស្តាប់ចម្រៀង VIP 🎵',
+    badge: 'ស្តាប់ចម្រៀង VIP 🎵',
+    category: 'streaming',
+    imageType: 'spotify',
+    descriptionKhmer: 'គណនី Spotify Premium ស្តាប់ចម្រៀង និងផតខាស់ជាង ១០០ លានបទ គ្មានពាណិជ្ជកម្ម ១០០%។ គុណភាពសម្លេង Very High 320kbps, Skip បទគ្មានដែនកំណត់ និងទាញយកចម្រៀងស្តាប់ Offline លើគ្រប់ទូរស័ព្ទ និងកុំព្យូទ័រ។',
+    deliveryType: 'email',
+    deliveryPlaceholder: 'Email Spotify ឬ Telegram Username របស់អ្នក',
+    features: [
+      'ស្តាប់ចម្រៀងគ្មានពាណិជ្ជកម្មរំខាន ១០០%',
+      'គុណភាពសំឡេងខ្ពស់ Very High 320kbps',
+      'ទាញយកចម្រៀងទុកស្តាប់ Offline គ្មានអ៊ីនធឺណិត',
+      'Skip ចម្រៀងគ្មានដែនកំណត់ (Unlimited Skips)',
+      'ភ្ជាប់ផ្ទាល់ជាមួយគណនីរបស់អ្នក ធានាពេញ 3 ខែ'
+    ],
+    durations: [
+      { label: '3 ខែ (90 ថ្ងៃ)', price: 3.00, popular: true },
+      { label: '6 ខែ (180 ថ្ងៃ)', price: 5.50 },
+      { label: '1 ឆ្នាំ (12 ខែ)', price: 9.90 }
+    ]
+  },
+  {
+    id: 'telegram-premium-3m',
+    titleKhmer: 'Telegram Premium (3 ខែ)',
+    titleEn: 'Telegram Premium (3 Months)',
+    price: 4.50,
+    salesCount: '4.9k',
+    tag: 'ពេញនិយម 🔥',
+    badge: 'ពេញនិយម 🔥',
+    category: 'social',
+    imageType: 'telegram',
+    descriptionKhmer: 'ដោះសោមុខងារពិសេសៗលើ Telegram របស់អ្នក! ផ្ញើ File បានរហូតដល់ 4GB, ទាញយកល្បឿនលឿនអតិបរមា No Speed Limit, ប្តូរសំឡេងទៅជាអក្សរ Voice-to-Text, ផ្លាកសញ្ញាផ្កាយ Premium Star Badge, និង Premium Animated Stickers រាប់ពាន់។',
+    deliveryType: 'telegram',
+    deliveryPlaceholder: 'Telegram @username ឬលេខទូរស័ព្ទ Telegram របស់អ្នក',
+    features: [
+      'ផ្ញើឯកសារ File ទំហំធំរហូតដល់ 4GB',
+      'ល្បឿន Download លឿនបំផុតគ្មានកំណត់ល្បឿន',
+      'បម្លែងសារសំឡេងជាអក្សរ (Voice-to-Text)',
+      'ផ្លាកសញ្ញាផ្កាយ VIP Premium Star ក្បែរឈ្មោះ',
+      'Animated Stickers & Emojis ពិសេសរាប់ពាន់'
+    ],
+    durations: [
+      { label: '3 ខែ (90 ថ្ងៃ)', price: 4.50, popular: true },
+      { label: '6 ខែ (180 ថ្ងៃ)', price: 8.50 },
+      { label: '1 ឆ្នាំ (12 ខែ)', price: 15.50 }
+    ]
+  },
+  {
+    id: 'duolingo-super-1y',
+    titleKhmer: 'Duolingo Super (1 ឆ្នាំ)',
+    titleEn: 'Duolingo Super (1 Year)',
+    price: 3.50,
+    salesCount: '2.6k',
+    tag: 'រៀនភាសា 📚',
+    badge: 'រៀនភាសា 📚',
+    category: 'tools',
+    imageType: 'duolingo',
+    descriptionKhmer: 'រៀនភាសាបរទេសប្រកបដោយប្រសិទ្ធភាពជាមួយ Duolingo Super! បេះដូងគ្មានដែនកំណត់ (Unlimited Hearts) រៀនគ្មានការរំខានដោយពាណិជ្ជកម្ម, កន្លែងអនុវត្តន៍ពិសេស Practice Hub, និងប្រលងរំលឹកកំហុស Mistakes Review។ រៀនភាសាអង់គ្លេស ចិន បារាំង ជប៉ុន និងជាង ៤០ ភាសាទៀត។',
+    deliveryType: 'email',
+    deliveryPlaceholder: 'Email Duolingo ឬ Telegram របស់អ្នកសម្រាប់ទទួល Invite',
+    features: [
+      'បេះដូងគ្មានដែនកំណត់ (Unlimited Hearts)',
+      'គ្មានពាណិជ្ជកម្មរំខានពេលកំពុងរៀន ១០០%',
+      'កន្លែងអនុវត្តន៍ពិសេស Practice Hub & Mistakes Review',
+      'រៀនបានជាង 40+ ភាសាជុំវិញពិភពលោក',
+      'ធានាពេញមួយឆ្នាំ 365 ថ្ងៃ'
+    ],
+    durations: [
+      { label: '1 ឆ្នាំ (12 ខែ)', price: 3.50, popular: true },
+      { label: '6 ខែ (180 ថ្ងៃ)', price: 2.20 },
+      { label: 'មួយជីវិត Lifetime', price: 5.90 }
+    ]
   }
 ];

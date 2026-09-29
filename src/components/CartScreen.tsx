@@ -222,7 +222,7 @@ export const CartScreen: React.FC<CartScreenProps> = ({
 
       {/* Sticky Bottom Checkout Bar (Above Bottom Nav) matching IMG_1190.png */}
       {items.length > 0 && (
-        <div className="fixed bottom-14 sm:bottom-16 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+        <div className="fixed bottom-14 sm:bottom-16 left-0 right-0 z-30 glass-bottom-nav px-4 py-2.5 shadow-[0_-6px_24px_rgba(0,0,0,0.05)]">
           <div className="max-w-md mx-auto sm:max-w-xl md:max-w-2xl lg:max-w-3xl flex items-center justify-between">
             {/* Total Section */}
             <div className="flex flex-col">

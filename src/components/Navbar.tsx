@@ -15,7 +15,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAccount,
 }) => {
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-100 px-4 py-3 sm:py-3.5 flex items-center justify-between shadow-xs">
+    <header className="sticky top-0 z-30 glass-header px-4 py-3 sm:py-3.5 flex items-center justify-between shadow-[0_4px_24px_rgba(0,0,0,0.03)] font-['Kantumruy_Pro'] transition-all">
       {/* Brand: Skypro store */}
       <div className="flex items-center gap-2.5">
         {/* Skypro Store Logo Image */}
@@ -44,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Cart Icon */}
         <button
           onClick={onOpenCart}
-          className="relative p-2 rounded-full hover:bg-slate-100 text-slate-800 transition-colors"
+          className="relative p-2 rounded-full hover:bg-slate-100/80 active:scale-90 text-slate-800 transition-all cursor-pointer"
           title="កន្ត្រកទំនិញ"
         >
           <ShoppingCart size={20} className="stroke-[2.1]" />
@@ -59,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {onOpenAccount && (
           <button
             onClick={onOpenAccount}
-            className="p-1.5 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-100 text-slate-700 transition-colors"
+            className="p-1.5 rounded-full border border-slate-200/80 hover:border-slate-300 hover:bg-slate-100/80 active:scale-90 text-slate-700 transition-all cursor-pointer"
             title="គណនី"
           >
             <User size={18} className="stroke-[2.1]" />
@@ -69,7 +69,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Menu Hamburger Icon */}
         <button
           onClick={onOpenDrawer}
-          className="p-2 rounded-full hover:bg-slate-100 text-slate-800 transition-colors"
+          className="p-2 rounded-full hover:bg-slate-100/80 active:scale-90 text-slate-800 transition-all cursor-pointer"
           title="ម៉ឺនុយ"
         >
           <Menu size={21} className="stroke-[2.1]" />
