@@ -102,7 +102,7 @@ export const HelpScreen: React.FC<HelpScreenProps> = ({
             <Clock size={18} />
           </div>
           <div>
-            <h4 className="font-bold text-slate-900 text-[11px] sm:text-xs">ប្រគល់ជូនរហ័ស</h4>
+            <h4 className="font-bold text-slate-900 text-[11px] sm:text-xs">សេវាកម្មរហ័ស</h4>
             <p className="text-[10px] text-slate-500">ភ្លាមៗក្រោយទូទាត់</p>
           </div>
         </div>

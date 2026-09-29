@@ -301,10 +301,10 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
           </div>
         </div>
 
-        {/* Delivery Method Info (Lightning icon) */}
-        <div className="px-3 py-2 rounded-2xl bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-900 flex items-center gap-2 font-medium">
-          <Zap size={14} className="text-indigo-600 shrink-0" />
-          <span>ជម្រើសនៃការដឹកជញ្ជូន៖ ប្រគល់ជូនស្វ័យប្រវត្តិតាម Telegram ឬ Email ភ្លាមៗ</span>
+        {/* Service Speed Info */}
+        <div className="px-3 py-2 rounded-2xl bg-blue-50/80 border border-blue-100 text-xs text-blue-900 flex items-center gap-2 font-medium">
+          <Zap size={14} className="text-blue-600 shrink-0" />
+          <span>សេវាកម្មរហ័ស៖ ប្រគល់ជូនស្វ័យប្រវត្តិតាម Telegram ឬ Email ភ្លាមៗ</span>
         </div>
 
         {/* Creative Checklist Details */}
@@ -325,16 +325,16 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
           </div>
         </div>
 
-        {/* Important Notes Box (Hand/Pen icon style) */}
-        <div className="bg-amber-50/60 rounded-3xl p-4 border border-amber-200/80 shadow-xs space-y-1.5 text-xs text-amber-950">
-          <div className="flex items-center gap-1.5 font-bold text-amber-900">
+        {/* Important Notes Box - Clean White / Slate Card without Yellow Background */}
+        <div className="bg-slate-50/90 rounded-3xl p-4 border border-slate-200/80 shadow-2xs space-y-1.5 text-xs text-slate-800">
+          <div className="flex items-center gap-1.5 font-bold text-slate-900">
             <span>✍️</span>
             <span>ចំណាំសំខាន់ពី Skypro Store៖</span>
           </div>
-          <ul className="space-y-1 text-[11.5px] text-amber-900/90 pl-1">
+          <ul className="space-y-1 text-[11.5px] text-slate-600 pl-1">
             {details.importantNotes.map((note, idx) => (
               <li key={idx} className="flex items-start gap-1.5">
-                <span className="text-amber-600 font-bold">•</span>
+                <span className="text-blue-600 font-bold">•</span>
                 <span>{note}</span>
               </li>
             ))}
