@@ -39,5 +39,6 @@ export interface OrderItem {
   paymentMethod: string;
   deliveryContact: string;
   credentialsOrKey: string;
+  activationLink?: string;
   status: 'completed' | 'processing';
 }

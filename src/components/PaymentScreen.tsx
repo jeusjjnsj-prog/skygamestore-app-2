@@ -22,6 +22,7 @@ import { Product, OrderItem } from '../types';
 import { ProductImage } from './ProductImage';
 import { storeSync } from '../services/storeSync';
 import { appendCacheBuster } from '../utils/imageStore';
+import { generateProductOrderDetails } from '../utils/activationLinks';
 
 interface PaymentScreenProps {
   product: Product;
@@ -132,17 +133,13 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
     }, 1200);
   };
 
+  const [copiedLink, setCopiedLink] = useState(false);
+
   const triggerPaymentSuccess = () => {
     if (paymentStatus === 'success') return;
 
     const orderId = `SKY-${Math.floor(100000 + Math.random() * 900000)}`;
-    const credentialsText = product.id.includes('gemini')
-      ? `Account: gemini.pro.${Math.floor(100 + Math.random() * 900)}@gmail.com | Pass: SkyPro#${Math.floor(1000 + Math.random() * 9000)} | Status: 18 Months Active`
-      : product.id.includes('capcut')
-      ? `CapCut VIP Code: CC-PRO-SKYPRO-${Math.floor(100000 + Math.random() * 900000)} | Status: 1 Month Pro Unlocked`
-      : product.id.includes('grok')
-      ? `Grok Super Key: GROK-XAI-SKYPRO-${Math.floor(100000 + Math.random() * 900000)} (10 Days Unlimited)`
-      : `Access Key: SKYPRO-VIP-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+    const orderDetails = generateProductOrderDetails(product.id);
 
     const newOrder: OrderItem = {
       orderId,
@@ -152,7 +149,8 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
       price: finalPrice,
       paymentMethod: 'ABA KHQR (Bakong)',
       deliveryContact: customerPhone || userContact || '0969749477',
-      credentialsOrKey: credentialsText,
+      credentialsOrKey: orderDetails.credentialsOrKey,
+      activationLink: orderDetails.activationLink,
       status: 'completed'
     };
 
@@ -173,6 +171,14 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
       navigator.clipboard.writeText(completedOrder.credentialsOrKey);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (completedOrder?.activationLink) {
+      navigator.clipboard.writeText(completedOrder.activationLink);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2000);
     }
   };
 
@@ -612,6 +618,49 @@ export const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 លេខកូដបញ្ជាទិញ៖ <span className="font-mono text-blue-600 font-bold">{completedOrder?.orderId}</span>
               </p>
             </div>
+
+            {/* 1. Dedicated Google Service Activation Link Card */}
+            {completedOrder?.activationLink && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50/90 to-indigo-50/90 border-2 border-blue-200 text-left space-y-3 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                      <Sparkles size={13} />
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold text-slate-900">
+                      លីងដំណើរការគណនី (Activation Link)
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-extrabold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200">
+                    100% Unique Token • មិនជាន់គ្នា
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-white font-mono text-[11px] sm:text-xs text-blue-900 break-all border border-blue-200 shadow-2xs select-all font-semibold">
+                  {completedOrder.activationLink}
+                </div>
+
+                <div className="flex items-center gap-2 pt-0.5">
+                  <a
+                    href={completedOrder.activationLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  >
+                    <ExternalLink size={13} />
+                    <span>បើកលីងដំណើរការ (Activate Now)</span>
+                  </a>
+
+                  <button
+                    onClick={handleCopyLink}
+                    className="py-2.5 px-3.5 rounded-xl bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer shrink-0"
+                  >
+                    {copiedLink ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    <span>{copiedLink ? 'បានចម្លងរួច!' : 'ចម្លងលីង'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Instant Credentials Box */}
             <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/90 text-left space-y-2.5">

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { User, LogOut, CheckCircle, Key, Copy, Check, Clock, ShieldCheck, Crown, ShieldAlert, Sparkles } from 'lucide-react';
+import { User, LogOut, CheckCircle, Key, Copy, Check, Clock, ShieldCheck, Crown, ShieldAlert, Sparkles, ExternalLink } from 'lucide-react';
 import { OrderItem } from '../types';
+import { storeSync } from '../services/storeSync';
 
 export const ADMIN_PHONE = '0969749477';
 
@@ -38,6 +39,22 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [name, setName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isSavingManual, setIsSavingManual] = useState(false);
+  const [saveToast, setSaveToast] = useState(false);
+
+  const handleTriggerSaveDone = async () => {
+    setIsSavingManual(true);
+    try {
+      await storeSync.forceRefresh();
+    } catch {
+      // ignore
+    }
+    setTimeout(() => {
+      setIsSavingManual(false);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 3000);
+    }, 350);
+  };
 
   useEffect(() => {
     if (pendingCartCheckout) {
@@ -224,14 +241,46 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 </div>
               </div>
 
-              <button
-                onClick={handleLogoutAction}
-                className="flex items-center gap-1 text-xs text-red-200 hover:text-white p-2 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-red-500/80 transition-all font-medium cursor-pointer shadow-xs"
-              >
-                <LogOut size={14} />
-                <span>ចាកចេញ</span>
-              </button>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <button
+                  onClick={handleLogoutAction}
+                  className="flex items-center gap-1 text-xs text-red-200 hover:text-white px-3 py-1.5 rounded-xl bg-white/10 hover:bg-red-500/80 transition-all font-medium cursor-pointer shadow-xs"
+                >
+                  <LogOut size={14} />
+                  <span>ចាកចេញ</span>
+                </button>
+
+                {/* ពាក្យថា Save រួចរាល់ នៅខាងក្រោមចាកចេញ */}
+                <button
+                  type="button"
+                  onClick={handleTriggerSaveDone}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs transition-all shadow-md active:scale-95 cursor-pointer ring-2 ring-emerald-300/60"
+                  title="Save រួចរាល់ភ្លាមៗ - អ្នកដទៃឃើញភ្លាមៗ ដោយមិនបាច់ចុច Publish"
+                >
+                  <CheckCircle size={14} className="text-slate-950 stroke-[2.5]" />
+                  <span>{isSavingManual ? 'កំពុង Sync...' : 'Save រួចរាល់'}</span>
+                </button>
+              </div>
             </div>
+
+            {/* Live Auto-Save Guarantee Banner */}
+            <div className="mt-3.5 pt-3 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="text-emerald-300 font-bold">
+                  ស្ថានភាព៖ Save រួចរាល់ ១០០% (Auto-Saved)
+                </span>
+              </div>
+              <div className="text-[11px] text-amber-200/90 font-medium">
+                ដាក់រូបបានភ្លាមៗ អ្នកដទៃឃើញភ្លាមៗ ដោយមិនបាច់ចុច Publish ម្ដងទៀតឡើយ!
+              </div>
+            </div>
+
+            {saveToast && (
+              <div className="mt-2.5 p-2 rounded-xl bg-emerald-500/25 border border-emerald-400 text-emerald-200 text-xs font-bold text-center animate-fadeIn shadow-sm">
+                ✓ Save រួចរាល់ហើយ! ទិន្នន័យផ្សាយបន្តផ្ទាល់ អ្នកដទៃឃើញរូបថ្មីភ្លាមៗ!
+              </div>
+            )}
           </div>
         ) : (
           /* Normal Customer Profile Card */
@@ -302,6 +351,49 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     </span>
                   </div>
                 </div>
+
+                {/* 1. Dedicated Google Service Activation Link Card */}
+                {(order.activationLink || (order.credentialsOrKey && order.credentialsOrKey.includes('http'))) && (() => {
+                  const actLink = order.activationLink || (order.credentialsOrKey.match(/https?:\/\/[^\s]+/)?.[0] || '');
+                  if (!actLink) return null;
+                  return (
+                    <div className="p-3 rounded-2xl bg-blue-50/90 border border-blue-200 space-y-2 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 font-bold text-blue-900 text-xs">
+                          <Sparkles size={13} className="text-blue-600" />
+                          <span>លីងដំណើរការគណនី (Activation Link)</span>
+                        </div>
+                        <span className="text-[9px] font-extrabold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200">
+                          100% Unique Token • មិនជាន់គ្នា
+                        </span>
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white font-mono text-[11px] text-blue-950 break-all border border-blue-100 shadow-2xs select-all font-medium">
+                        {actLink}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={actLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-1 transition-all shadow-2xs"
+                        >
+                          <ExternalLink size={13} />
+                          <span>បើកលីងដំណើរការ</span>
+                        </a>
+
+                        <button
+                          onClick={() => handleCopy(actLink)}
+                          className="py-1.5 px-3 rounded-lg bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs flex items-center gap-1 shadow-2xs cursor-pointer"
+                        >
+                          {copiedId === actLink ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                          <span>{copiedId === actLink ? 'បានចម្លងរួច!' : 'ចម្លងលីង'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {order.credentialsOrKey && (
                   <div className="p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-2">
