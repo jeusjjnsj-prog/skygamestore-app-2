@@ -7,13 +7,26 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.resolve(process.cwd(), 'data', 'store_data.json');
 
+interface StoreDataSchema {
+  productImages: Record<string, string>;
+  qrImage: string | null;
+  heroBanner: string | null;
+}
+
 // Ensure data folder and storage file exist
-function loadStoreData(): { productImages: Record<string, string>; qrImage: string | null } {
-  let result: { productImages: Record<string, string>; qrImage: string | null } = { productImages: {}, qrImage: null };
+function loadStoreData(): StoreDataSchema {
+  let result: StoreDataSchema = { 
+    productImages: {}, 
+    qrImage: '/images/khqr_custom.jpg', 
+    heroBanner: '/images/skypro_hero_banner.jpg' 
+  };
   try {
     if (fs.existsSync(DATA_FILE)) {
       const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-      result = JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      result.productImages = parsed.productImages || {};
+      result.qrImage = parsed.qrImage || '/images/khqr_custom.jpg';
+      result.heroBanner = parsed.heroBanner || '/images/skypro_hero_banner.jpg';
     }
   } catch (err) {
     console.error('Error loading store data:', err);
@@ -31,6 +44,10 @@ function loadStoreData(): { productImages: Record<string, string>; qrImage: stri
             if (!result.qrImage) {
               result.qrImage = `/images/${file}`;
             }
+          } else if (id === 'skypro_hero_banner') {
+            if (!result.heroBanner) {
+              result.heroBanner = `/images/${file}`;
+            }
           } else {
             if (!result.productImages[id]) {
               result.productImages[id] = `/images/${file}`;
@@ -46,7 +63,7 @@ function loadStoreData(): { productImages: Record<string, string>; qrImage: stri
   return result;
 }
 
-function saveStoreData(data: { productImages: Record<string, string>; qrImage: string | null }) {
+function saveStoreData(data: StoreDataSchema) {
   try {
     const dir = path.dirname(DATA_FILE);
     if (!fs.existsSync(dir)) {
@@ -103,23 +120,29 @@ app.get('/api/store-data', (_req: Request, res: Response) => {
 function syncImageToPublicFolder(filenamePrefix: string, dataUrl: string | null) {
   try {
     const publicDir = path.resolve(process.cwd(), 'public', 'images');
+    const distDir = path.resolve(process.cwd(), 'dist', 'images');
     if (!fs.existsSync(publicDir)) {
       fs.mkdirSync(publicDir, { recursive: true });
     }
-    const filePath = path.join(publicDir, `${filenamePrefix}.jpg`);
+    if (!fs.existsSync(distDir)) {
+      fs.mkdirSync(distDir, { recursive: true });
+    }
+    const publicFilePath = path.join(publicDir, `${filenamePrefix}.jpg`);
+    const distFilePath = path.join(distDir, `${filenamePrefix}.jpg`);
+
     if (!dataUrl) {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      if (fs.existsSync(publicFilePath)) fs.unlinkSync(publicFilePath);
+      if (fs.existsSync(distFilePath)) fs.unlinkSync(distFilePath);
       return;
     }
     const match = dataUrl.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
     if (match) {
       const buffer = Buffer.from(match[2], 'base64');
-      fs.writeFileSync(filePath, buffer);
+      fs.writeFileSync(publicFilePath, buffer);
+      fs.writeFileSync(distFilePath, buffer);
     }
   } catch (err) {
-    console.error('Error syncing image to public folder:', err);
+    console.error('Error syncing image to public/dist folders:', err);
   }
 }
 
@@ -160,6 +183,21 @@ app.post('/api/store-qr', (req: Request, res: Response) => {
   res.json({
     success: true,
     qrImage: currentStoreData.qrImage,
+  });
+});
+
+// 3.5. POST /api/hero-banner -> Admin updates custom hero banner image
+app.post('/api/hero-banner', (req: Request, res: Response) => {
+  const { bannerImage } = req.body;
+  currentStoreData.heroBanner = bannerImage || null;
+
+  saveStoreData(currentStoreData);
+  syncImageToPublicFolder('skypro_hero_banner', bannerImage);
+  broadcastStoreUpdate();
+
+  res.json({
+    success: true,
+    heroBanner: currentStoreData.heroBanner,
   });
 });
 

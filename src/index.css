@@ -124,3 +124,18 @@
 .hero-glass-surface {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 60%, #eff6ff 100%);
 }
+
+/* Smooth Floating Animation for Hero Banner */
+@keyframes heroSmoothFloat {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-hero-float {
+  animation: heroSmoothFloat 3.5s ease-in-out infinite alternate;
+  will-change: transform;
+}

@@ -1,8 +1,13 @@
-import { DEFAULT_PERMANENT_IMAGES, DEFAULT_PERMANENT_QR } from '../data/permanentStoreImages';
+import { 
+  DEFAULT_PERMANENT_IMAGES, 
+  DEFAULT_PERMANENT_QR, 
+  DEFAULT_PERMANENT_HERO_BANNER 
+} from '../data/permanentStoreImages';
 
 export interface StoreSyncData {
   productImages: Record<string, string>;
   qrImage: string | null;
+  heroBanner: string | null;
   lastUpdated?: number;
 }
 
@@ -15,6 +20,7 @@ class StoreSyncService {
   private currentData: StoreSyncData = {
     productImages: { ...DEFAULT_PERMANENT_IMAGES },
     qrImage: DEFAULT_PERMANENT_QR,
+    heroBanner: DEFAULT_PERMANENT_HERO_BANNER,
     lastUpdated: Date.now(),
   };
 
@@ -28,6 +34,7 @@ class StoreSyncService {
     try {
       const savedImgs = localStorage.getItem('skypro_custom_images');
       const savedQr = localStorage.getItem('skypro_custom_qr');
+      const savedBanner = localStorage.getItem('skypro_custom_hero_banner');
       const savedTs = localStorage.getItem('skypro_images_timestamp');
       if (savedTs) {
         this.lastUpdated = parseInt(savedTs, 10) || Date.now();
@@ -40,6 +47,9 @@ class StoreSyncService {
       }
       if (savedQr) {
         this.currentData.qrImage = savedQr;
+      }
+      if (savedBanner) {
+        this.currentData.heroBanner = savedBanner;
       }
       this.currentData.lastUpdated = this.lastUpdated;
     } catch {
@@ -151,7 +161,7 @@ class StoreSyncService {
     }
   }
 
-  private applySyncData(data: StoreSyncData) {
+  private applySyncData(data: Partial<StoreSyncData>) {
     this.lastUpdated = Date.now();
     this.currentData = {
       productImages: {
@@ -162,6 +172,9 @@ class StoreSyncService {
       qrImage: (data.qrImage !== undefined && data.qrImage !== null)
         ? data.qrImage
         : (this.currentData.qrImage || DEFAULT_PERMANENT_QR),
+      heroBanner: (data.heroBanner !== undefined && data.heroBanner !== null)
+        ? data.heroBanner
+        : (this.currentData.heroBanner || DEFAULT_PERMANENT_HERO_BANNER),
       lastUpdated: this.lastUpdated,
     };
 
@@ -173,6 +186,11 @@ class StoreSyncService {
         localStorage.setItem('skypro_custom_qr', this.currentData.qrImage);
       } else {
         localStorage.removeItem('skypro_custom_qr');
+      }
+      if (this.currentData.heroBanner) {
+        localStorage.setItem('skypro_custom_hero_banner', this.currentData.heroBanner);
+      } else {
+        localStorage.removeItem('skypro_custom_hero_banner');
       }
     } catch {
       // Ignore
@@ -217,18 +235,14 @@ class StoreSyncService {
       });
 
       if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.productImages) {
-          this.currentData.productImages = json.productImages;
-          this.lastUpdated = Date.now();
-          this.notify();
-        }
+        this.lastUpdated = Date.now();
+        this.notify();
       }
     } catch (err) {
       console.error('Failed to sync product image to server:', err);
     }
 
-    // 3. Trigger 1-second auto-refresh to guarantee front-page and all components reflect fresh image
+    // 3. Trigger 1-second auto-refresh
     setTimeout(() => {
       this.forceRefresh();
     }, 1000);
@@ -236,13 +250,12 @@ class StoreSyncService {
     return true;
   }
 
-  // Update custom ABA KHQR image and sync across all clients instantly
-  public async updateStoreQr(qrImage: string | null): Promise<boolean> {
+  // Update custom KHQR image and sync across all clients instantly
+  public async updateStoreQR(qrImage: string | null): Promise<boolean> {
     const now = Date.now();
     this.lastUpdated = now;
 
-    // 1. Instant optimistic update locally
-    this.currentData.qrImage = qrImage;
+    this.currentData.qrImage = qrImage || DEFAULT_PERMANENT_QR;
     this.currentData.lastUpdated = now;
     this.notify();
 
@@ -276,6 +289,56 @@ class StoreSyncService {
     }
 
     // 3. Trigger 1-second auto-refresh
+    setTimeout(() => {
+      this.forceRefresh();
+    }, 1000);
+
+    return true;
+  }
+
+  // Alias for compatibility
+  public async updateStoreQr(qrImage: string | null): Promise<boolean> {
+    return this.updateStoreQR(qrImage);
+  }
+
+  // Update hero banner image and sync across all clients & server
+  public async updateHeroBanner(bannerImage: string | null): Promise<boolean> {
+    const now = Date.now();
+    this.lastUpdated = now;
+
+    this.currentData.heroBanner = bannerImage || DEFAULT_PERMANENT_HERO_BANNER;
+    this.currentData.lastUpdated = now;
+    this.notify();
+
+    try {
+      localStorage.setItem('skypro_images_timestamp', now.toString());
+      if (bannerImage) {
+        localStorage.setItem('skypro_custom_hero_banner', bannerImage);
+      } else {
+        localStorage.removeItem('skypro_custom_hero_banner');
+      }
+    } catch {
+      // Ignore
+    }
+
+    // Persist to server
+    try {
+      const res = await fetch('/api/hero-banner', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ bannerImage }),
+      });
+
+      if (res.ok) {
+        this.lastUpdated = Date.now();
+        this.notify();
+      }
+    } catch (err) {
+      console.error('Failed to sync hero banner to server:', err);
+    }
+
     setTimeout(() => {
       this.forceRefresh();
     }, 1000);

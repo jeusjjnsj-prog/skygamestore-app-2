@@ -146,8 +146,10 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 2500);
   };
 
-  const handleBuyNow = (product: Product, durationIndex: number = 0) => {
-    const chosenPlan = product.durations[durationIndex] || product.durations[0];
+  const handleBuyNow = (product: Product, durationIndex?: number) => {
+    const popIdx = product.durations?.findIndex(d => d.popular);
+    const resolvedIndex = durationIndex !== undefined ? durationIndex : (popIdx >= 0 ? popIdx : 0);
+    const chosenPlan = product.durations[resolvedIndex] || product.durations[0];
     const itemPrice = chosenPlan ? chosenPlan.price : product.price;
     const planLabel = chosenPlan ? chosenPlan.label : 'Standard';
 
@@ -190,8 +192,10 @@ export default function App() {
     setActiveTab('cart');
   };
 
-  const handleAddToCart = (product: Product, durationIndex: number = 0) => {
-    const chosenPlan = product.durations[durationIndex] || product.durations[0];
+  const handleAddToCart = (product: Product, durationIndex?: number) => {
+    const popIdx = product.durations?.findIndex(d => d.popular);
+    const resolvedIndex = durationIndex !== undefined ? durationIndex : (popIdx >= 0 ? popIdx : 0);
+    const chosenPlan = product.durations[resolvedIndex] || product.durations[0];
     const itemPrice = chosenPlan ? chosenPlan.price : product.price;
     const planLabel = chosenPlan ? chosenPlan.label : 'Default';
 
@@ -393,6 +397,7 @@ export default function App() {
             <div className="px-2.5 sm:px-6 py-3.5 sm:py-6 space-y-4 sm:space-y-6">
               {/* Image Banner Slider with Auto-slide, Touch Swipe & Arrows */}
               <BannerSlider
+                isAdmin={isAdmin}
                 onSelectProduct={(productId) => {
                   const targetProd = PRODUCTS.find((p) => p.id === productId);
                   if (targetProd) {

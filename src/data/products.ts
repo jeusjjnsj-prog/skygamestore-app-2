@@ -138,8 +138,7 @@ export const PRODUCTS: Product[] = [
     durations: [
       { label: '1 ឆ្នាំ (12 ខែ)', price: 4.00, popular: true },
       { label: '6 ខែ', price: 2.80 },
-      { label: '1 ខែ', price: 1.00 },
-      { label: 'មួយជីវិត Lifetime', price: 6.50 }
+      { label: '1 ខែ', price: 1.00 }
     ]
   },
   {
@@ -292,7 +291,7 @@ export const PRODUCTS: Product[] = [
     durations: [
       { label: '1 ឆ្នាំ (12 ខែ)', price: 3.50, popular: true },
       { label: '6 ខែ (180 ថ្ងៃ)', price: 2.20 },
-      { label: 'មួយជីវិត Lifetime', price: 5.90 }
+      { label: '1 ខែ (30 ថ្ងៃ)', price: 1.00 }
     ]
   }
 ];

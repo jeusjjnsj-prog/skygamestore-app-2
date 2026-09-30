@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, 
   ShieldCheck, 
@@ -42,9 +42,40 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
   isAdmin = false,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [selectedDurationIndex, setSelectedDurationIndex] = useState(0);
+
+  // Default selected duration to popular plan (e.g. 1 ឆ្នាំ or 1 ខែ) or first option
+  const getInitialDurationIndex = () => {
+    const popIdx = product.durations?.findIndex(d => d.popular);
+    return popIdx >= 0 ? popIdx : 0;
+  };
+
+  const [selectedDurationIndex, setSelectedDurationIndex] = useState<number>(getInitialDurationIndex);
+
+  // Sync selected plan when viewing another product
+  useEffect(() => {
+    const popIdx = product.durations?.findIndex(d => d.popular);
+    setSelectedDurationIndex(popIdx >= 0 ? popIdx : 0);
+  }, [product.id]);
+
   const selectedDuration = product.durations[selectedDurationIndex] || product.durations[0];
   const finalPrice = selectedDuration ? selectedDuration.price : product.price;
+
+  // Calculate realistic stock count based on product type
+  // Gemini products: between 15 and 30
+  // Other products: between 40 and 100
+  const getStockCount = (id: string): number => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+      hash = (hash * 31 + id.charCodeAt(i)) % 10007;
+    }
+    const isGemini = id.toLowerCase().includes('gemini');
+    if (isGemini) {
+      return 15 + (hash % 16); // 15 to 30
+    }
+    return 40 + (hash % 61); // 40 to 100
+  };
+
+  const stockCount = getStockCount(product.id);
 
   // Customized, creative non-copied specifications for each product
   const getProductCustomDetails = () => {
@@ -231,9 +262,9 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({
             <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
               {details.categoryTag}
             </span>
-            <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>មានក្នុងស្តុក (In Stock)</span>
+            <span className="text-xs md:text-sm font-medium text-emerald-600 flex items-center gap-1.5 font-['Kantumruy_Pro']">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+              <span>នៅសល់ {stockCount} ក្នុងស្តុក</span>
             </span>
           </div>
 
